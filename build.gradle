@@ -1,0 +1,123 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven' // for install task as well as deploy dependencies
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+group = 'org.hibernate.build.gradle'
+version = '1.0.0-SNAPSHOT'
+
+defaultTasks 'build'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    mavenRepo name: 'jboss-nexus', urls: "https://repository.jboss.org/nexus/content/groups/public/"
+    mavenRepo name: "jboss-snapshots", urls: "http://snapshots.jboss.org/maven2/"
+}
+
+configurations {
+    deployerJars {
+        description = 'Jars needed for doing deployment to JBoss Nexus repo'
+    }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'org.slf4j:slf4j-api:1.6.0'
+    compile 'org.apache.ant:ant:1.7.0'
+    compile 'org.apache.maven:maven-ant-tasks:2.1.0'
+    compile 'dom4j:dom4j:1.6.1@jar'
+
+    groovy localGroovy()
+
+    deployerJars 'org.apache.maven.wagon:wagon-http:1.0-beta-6'
+}
+
+ideaProject {
+    javaVersion = "1.6"
+    withXml { provider ->
+        def node = provider.asNode()
+        def vcsConfig = node.component.find { it.'@name' == 'VcsDirectoryMappings' }
+        vcsConfig.mapping[0].'@vcs' = 'Git'
+    }
+}
+
+ideaModule {
+}
+
+manifest.mainAttributes(
+    provider: 'gradle',
+    'Implementation-Url': 'http://hibernate.org',
+    'Implementation-Version': version,
+    'Implementation-Vendor': 'Hibernate.org',
+    'Implementation-Vendor-Id': 'org.hibernate'
+)
+
+// sources.jar ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+task sourcesJar(type: Jar, dependsOn: compileJava) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+artifacts {
+    archives sourcesJar
+}
+uploadArchives.dependsOn sourcesJar
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+// Maven stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    would be fantabulous if the maven plugin handled all this...
+assemble.doLast( { install } )
+uploadArchives.dependsOn install
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def pomConfig = {
+    url 'http://hibernate.org'
+    organization {
+        name 'Hibernate.org'
+        url 'http://hibernate.org'
+    }
+    issueManagement {
+        system 'github'
+        url 'https://github.com/sebersole/gradle-upload-auth-plugin/issues'
+    }
+    scm {
+	url "https://github.com/sebersole/gradle-upload-auth-plugin"
+	connection "scm:git:https://sebersole@github.com/sebersole/gradle-upload-auth-plugin.git"
+	developerConnection "scm:git:git@github.com:sebersole/gradle-upload-auth-plugin.git"
+    }
+    licenses {
+	license {
+	    name 'GNU Lesser General Public License'
+	    url 'http://www.gnu.org/licenses/lgpl-2.1.html'
+	    distribution 'repo'
+	}
+    }
+    developers {
+    }
+}
+
+// This is the kind of malarkey this plugin tries to address ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if ( ! hasProperty( "JBOSS_REPO_USER" ) ) {
+    JBOSS_REPO_USER = "";
+}
+if ( ! hasProperty( "JBOSS_REPO_PASS" ) ) {
+    JBOSS_REPO_PASS = "";
+}
+uploadArchives {
+    repositories.mavenDeployer {
+        name = 'jbossDeployer'
+        configuration = configurations.deployerJars
+        pom.project pomConfig
+        repository(id: "jboss-releases-repository", url: "https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/") {
+            authentication(userName: JBOSS_REPO_USER, password: JBOSS_REPO_PASS)
+        }
+        snapshotRepository(id: "jboss-snapshots-repository", url: "https://repository.jboss.org/nexus/content/repositories/snapshots") {
+            authentication(userName: JBOSS_REPO_USER, password: JBOSS_REPO_PASS)
+        }
+    }
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
