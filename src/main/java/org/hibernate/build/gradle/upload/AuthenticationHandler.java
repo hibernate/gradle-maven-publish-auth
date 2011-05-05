@@ -53,7 +53,7 @@ public class AuthenticationHandler implements Action<Upload> {
 					public void execute(MavenDeployer deployer) {
 						final Object repositoryDelegate = deployer.getRepository();
 						if ( repositoryDelegate != null ) {
-							final MavenRepository repository = new MavenRepository( repositoryDelegate );
+							final MavenRepository repository = new MavenRepository( repositoryDelegate, deployer.getClass().getClassLoader() );
 							final MavenAuthentication authentication = locateAuthenticationDetails( repository );
 							if ( authentication != null ) {
 								repository.addAuthentication( authentication );
@@ -61,7 +61,7 @@ public class AuthenticationHandler implements Action<Upload> {
 						}
 						final Object snapshotRepositoryDelegate = deployer.getSnapshotRepository();
 						if ( snapshotRepositoryDelegate != null ) {
-							final MavenRepository snapshotRepository = new MavenRepository( snapshotRepositoryDelegate );
+							final MavenRepository snapshotRepository = new MavenRepository( snapshotRepositoryDelegate, deployer.getClass().getClassLoader() );
 							final MavenAuthentication authentication = locateAuthenticationDetails( snapshotRepository );
 							if ( authentication != null ) {
 								snapshotRepository.addAuthentication( authentication );
