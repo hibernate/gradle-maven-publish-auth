@@ -5,7 +5,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = 'org.hibernate.build.gradle'
-version = '1.0.1-SNAPSHOT'
+version = '1.0.1'
 
 defaultTasks 'build'
 
@@ -97,6 +97,12 @@ def pomConfig = {
 	}
     }
     developers {
+        developer {
+            id 'sebersole'
+            name 'Steve Ebersole'
+            organization 'Hibernate'
+            organizationUrl 'http://hibernate.org'
+        }
     }
 }
 
