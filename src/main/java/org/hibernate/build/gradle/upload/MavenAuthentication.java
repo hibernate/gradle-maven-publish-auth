@@ -23,8 +23,6 @@
  */
 package org.hibernate.build.gradle.upload;
 
-import java.lang.reflect.Method;
-
 /**
  * A wrapper around the {@link org.apache.maven.artifact.ant.Authentication} class from the maven ant tasks due to
  * some change in Gradle causing classloader problems.
@@ -32,148 +30,41 @@ import java.lang.reflect.Method;
  * @author Steve Ebersole
  */
 public class MavenAuthentication {
-	private final Object delegate;
 
-	public MavenAuthentication() {
-		try {
-			this.delegate = getAuthClass().newInstance();
-		}
-		catch (Exception e) {
-			throw new ReflectionException( "Unable to instantiate " + AUTH_CLASS_NAME, e );
-		}
+    private String userName;
+    private String password;
+    private String privateKey;
+    private String passphrase;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String username) {
+        this.userName = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
 	}
 
-	public void setUserName(String username) {
-		try {
-			getUserNameSetter().invoke( delegate, username );
-		}
-		catch (Exception e) {
-			throw new ReflectionException( "Unable to invoke setUserName method", e );
-		}
-	}
+    public String getPrivateKey() {
+        return privateKey;
+    }
 
-	public void setPassword(String password) {
-		try {
-			getPasswordSetter().invoke( delegate, password );
-		}
-		catch (Exception e) {
-			throw new ReflectionException( "Unable to invoke setPassword method", e );
-		}
-	}
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
 
-	public void setPrivateKey(String privateKey) {
-		try {
-			getPrivateKeySetter().invoke( delegate, privateKey );
-		}
-		catch (Exception e) {
-			throw new ReflectionException( "Unable to invoke setPrivateKey method", e );
-		}
-	}
+    public String getPassphrase() {
+        return passphrase;
+    }
 
-	public void setPassphrase(String passphrase) {
-		try {
-			getPassphraseSetter().invoke( delegate, passphrase );
-		}
-		catch (Exception e) {
-			throw new ReflectionException( "Unable to invoke setPassphrase method", e );
-		}
-	}
-
-	Object getDelegate() {
-		return delegate;
-	}
-
-
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	private static Method USER_NAME_SETTER_METHOD;
-
-	private static Method getUserNameSetter() {
-		if ( USER_NAME_SETTER_METHOD == null ) {
-			USER_NAME_SETTER_METHOD = locateUserNameSetter();
-		}
-		return USER_NAME_SETTER_METHOD;
-	}
-
-	private static Method locateUserNameSetter() {
-		try {
-			return getAuthClass().getMethod( "setUserName", String.class );
-		}
-		catch (NoSuchMethodException e) {
-			throw new ReflectionException( "Could not locate setUserName method", e );
-		}
-	}
-
-	private static Method PASSWORD_SETTER_METHOD;
-
-	private static Method getPasswordSetter() {
-		if ( PASSWORD_SETTER_METHOD == null ) {
-			PASSWORD_SETTER_METHOD = locatePasswordSetter();
-		}
-		return PASSWORD_SETTER_METHOD;
-	}
-
-	private static Method locatePasswordSetter() {
-		try {
-			return getAuthClass().getMethod( "setPassword", String.class );
-		}
-		catch (NoSuchMethodException e) {
-			throw new ReflectionException( "Could not locate setPassword method", e );
-		}
-	}
-
-	private static Method PRIVATE_KEY_SETTER_METHOD;
-
-	private static Method getPrivateKeySetter() {
-		if ( PRIVATE_KEY_SETTER_METHOD == null ) {
-			PRIVATE_KEY_SETTER_METHOD = locatePrivateKeySetter();
-		}
-		return PRIVATE_KEY_SETTER_METHOD;
-	}
-
-	private static Method locatePrivateKeySetter() {
-		try {
-			return getAuthClass().getMethod( "setPrivateKey", String.class );
-		}
-		catch (NoSuchMethodException e) {
-			throw new ReflectionException( "Could not locate setPrivateKey method", e );
-		}
-	}
-
-	private static Method PASSPHRASE_SETTER_METHOD;
-
-	private static Method getPassphraseSetter() {
-		if ( PASSPHRASE_SETTER_METHOD == null ) {
-			PASSPHRASE_SETTER_METHOD = locatePassphraseSetter();
-		}
-		return PASSPHRASE_SETTER_METHOD;
-	}
-
-	private static Method locatePassphraseSetter() {
-		try {
-			return getAuthClass().getMethod( "setPassphrase", String.class );
-		}
-		catch (NoSuchMethodException e) {
-			throw new ReflectionException( "Could not locate setPassphrase method", e );
-		}
-	}
-
-	private static final String AUTH_CLASS_NAME = "org.apache.maven.artifact.ant.Authentication";
-	private static Class AUTH_CLASS;
-
-	public static Class getAuthClass() {
-		if ( AUTH_CLASS == null ) {
-			AUTH_CLASS = locateAuthClass();
-		}
-		return AUTH_CLASS;
-	}
-
-	private static Class locateAuthClass() {
-		try {
-			return Class.forName( AUTH_CLASS_NAME );
-		}
-		catch (ClassNotFoundException e) {
-			throw new ReflectionException( "Unable to locate class [" + AUTH_CLASS_NAME + "]", e );
-		}
-	}
+    public void setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+    }
 }
