@@ -23,7 +23,6 @@
  */
 package org.hibernate.build.gradle.upload;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -34,10 +33,12 @@ import java.lang.reflect.Method;
  */
 public class MavenRepository {
 	private final Object delegate;
+    private final ClassLoader classLoader;
 
-	public MavenRepository(Object delegate) {
+    public MavenRepository(Object delegate, ClassLoader classLoader) {
 		this.delegate = delegate;
-	}
+        this.classLoader = classLoader;
+    }
 
 	public String getId() {
 		try {
@@ -59,7 +60,7 @@ public class MavenRepository {
 
 	public void addAuthentication(MavenAuthentication authentication) {
 		try {
-			authenticationAdderMethod().invoke( delegate, authentication.getDelegate() );
+			authenticationAdderMethod().invoke( delegate, getDelegate(authentication) );
 		}
 		catch (Exception e) {
 			throw new ReflectionException( "Unable to invoke addAuthentication method", e );
@@ -69,13 +70,66 @@ public class MavenRepository {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	private static Method ID_GETTER_METHOD;
+    private Object getDelegate(MavenAuthentication authentication) {
+        Object delegate;
+        try {
+            delegate = getAuthClass().newInstance();
+        }
+        catch (Exception e) {
+            throw new ReflectionException( "Unable to instantiate " + AUTH_CLASS_NAME, e );
+        }
+        setUserName(authentication.getUserName(), delegate);
+        setPassword(authentication.getPassword(), delegate);
+        setPrivateKey(authentication.getPrivateKey(), delegate);
+        setPassphrase(authentication.getPassphrase(), delegate);
+        return delegate;
+    }
+
+    private void setUserName(String username, Object delegate) {
+        try {
+            getUserNameSetter().invoke( delegate, username );
+        }
+        catch (Exception e) {
+            throw new ReflectionException( "Unable to invoke setUserName method", e );
+        }
+    }
+
+    private void setPassword(String password, Object delegate) {
+        try {
+            getPasswordSetter().invoke( delegate, password );
+        }
+        catch (Exception e) {
+            throw new ReflectionException( "Unable to invoke setPassword method", e );
+        }
+    }
+
+    private void setPrivateKey(String privateKey, Object delegate) {
+        try {
+            getPrivateKeySetter().invoke( delegate, privateKey );
+        }
+        catch (Exception e) {
+            throw new ReflectionException( "Unable to invoke setPrivateKey method", e );
+        }
+    }
+
+    private void setPassphrase(String passphrase, Object delegate) {
+        try {
+            getPassphraseSetter().invoke( delegate, passphrase );
+        }
+        catch (Exception e) {
+            throw new ReflectionException( "Unable to invoke setPassphrase method", e );
+        }
+    }
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	private Method idGetterMethod;
 
 	public Method idGetterMethod() {
-		if ( ID_GETTER_METHOD == null ) {
-			ID_GETTER_METHOD = locateIdGetterMethod();
+		if ( idGetterMethod == null ) {
+			idGetterMethod = locateIdGetterMethod();
 		}
-		return ID_GETTER_METHOD;
+		return idGetterMethod;
 	}
 
 	private Method locateIdGetterMethod() {
@@ -87,13 +141,13 @@ public class MavenRepository {
 		}
 	}
 
-	private static Method URL_GETTER_METHOD;
+	private Method urlGetterMethod;
 
 	public Method urlGetterMethod() {
-		if ( URL_GETTER_METHOD == null ) {
-			URL_GETTER_METHOD = locateUrlGetterMethod();
+		if ( urlGetterMethod == null ) {
+			urlGetterMethod = locateUrlGetterMethod();
 		}
-		return URL_GETTER_METHOD;
+		return urlGetterMethod;
 	}
 
 	private Method locateUrlGetterMethod() {
@@ -105,18 +159,18 @@ public class MavenRepository {
 		}
 	}
 
-	private static Method ADD_AUTHENTICATION_METHOD;
+	private Method addAuthenticationMethod;
 
 	private Method authenticationAdderMethod() {
-		if ( ADD_AUTHENTICATION_METHOD == null ) {
-			ADD_AUTHENTICATION_METHOD = locateAuthenticationAdderMethod();
+		if ( addAuthenticationMethod == null ) {
+			addAuthenticationMethod = locateAuthenticationAdderMethod();
 		}
-		return ADD_AUTHENTICATION_METHOD;
+		return addAuthenticationMethod;
 	}
 
 	private Method locateAuthenticationAdderMethod() {
 		try {
-			return getRemoteRepositoryClass().getMethod( "addAuthentication", MavenAuthentication.getAuthClass() );
+			return getRemoteRepositoryClass().getMethod( "addAuthentication", getAuthClass() );
 		}
 		catch (NoSuchMethodException e) {
 			throw new ReflectionException( "Could not locate addAuthentication method", e );
@@ -124,21 +178,113 @@ public class MavenRepository {
 	}
 
 	private static final String REMOTE_REPO_CLASS_NAME = "org.apache.maven.artifact.ant.RemoteRepository";
-	private static Class REMOTE_REPO_CLASS;
+	private Class remoteRepoClass;
 
-	public static Class getRemoteRepositoryClass() {
-		if ( REMOTE_REPO_CLASS == null ) {
-			REMOTE_REPO_CLASS = locateRemoteRepositoryClass();
+	public Class getRemoteRepositoryClass() {
+		if ( remoteRepoClass == null ) {
+			remoteRepoClass = locateRemoteRepositoryClass();
 		}
-		return REMOTE_REPO_CLASS;
+		return remoteRepoClass;
 	}
 
-	private static Class locateRemoteRepositoryClass() {
+	private Class locateRemoteRepositoryClass() {
 		try {
-			return Class.forName( REMOTE_REPO_CLASS_NAME );
+			return classLoader.loadClass(REMOTE_REPO_CLASS_NAME);
 		}
 		catch (ClassNotFoundException e) {
 			throw new ReflectionException( "Unable to locate class [" + REMOTE_REPO_CLASS_NAME + "]", e );
 		}
 	}
+
+    private Method userNameSetterMethod;
+
+    private Method getUserNameSetter() {
+        if ( userNameSetterMethod == null ) {
+            userNameSetterMethod = locateUserNameSetter();
+        }
+        return userNameSetterMethod;
+    }
+
+    private Method locateUserNameSetter() {
+        try {
+            return getAuthClass().getMethod( "setUserName", String.class );
+        }
+        catch (NoSuchMethodException e) {
+            throw new ReflectionException( "Could not locate setUserName method", e );
+        }
+    }
+
+    private Method passwordSetterMethod;
+
+    private Method getPasswordSetter() {
+        if ( passwordSetterMethod == null ) {
+            passwordSetterMethod = locatePasswordSetter();
+        }
+        return passwordSetterMethod;
+    }
+
+    private Method locatePasswordSetter() {
+        try {
+            return getAuthClass().getMethod( "setPassword", String.class );
+        }
+        catch (NoSuchMethodException e) {
+            throw new ReflectionException( "Could not locate setPassword method", e );
+        }
+    }
+
+    private Method privateKeySetterMethod;
+
+    private Method getPrivateKeySetter() {
+        if ( privateKeySetterMethod == null ) {
+            privateKeySetterMethod = locatePrivateKeySetter();
+        }
+        return privateKeySetterMethod;
+    }
+
+    private Method locatePrivateKeySetter() {
+        try {
+            return getAuthClass().getMethod( "setPrivateKey", String.class );
+        }
+        catch (NoSuchMethodException e) {
+            throw new ReflectionException( "Could not locate setPrivateKey method", e );
+        }
+    }
+
+    private Method passphraseSetterMethod;
+
+    private Method getPassphraseSetter() {
+        if ( passphraseSetterMethod == null ) {
+            passphraseSetterMethod = locatePassphraseSetter();
+        }
+        return passphraseSetterMethod;
+    }
+
+    private Method locatePassphraseSetter() {
+        try {
+            return getAuthClass().getMethod( "setPassphrase", String.class );
+        }
+        catch (NoSuchMethodException e) {
+            throw new ReflectionException( "Could not locate setPassphrase method", e );
+        }
+    }
+
+    private static final String AUTH_CLASS_NAME = "org.apache.maven.artifact.ant.Authentication";
+    private Class authClass;
+
+    public Class getAuthClass() {
+        if ( authClass == null ) {
+            authClass = locateAuthClass();
+        }
+        return authClass;
+    }
+
+    private Class locateAuthClass() {
+        try {
+            return classLoader.loadClass( AUTH_CLASS_NAME );
+        }
+        catch (ClassNotFoundException e) {
+            throw new ReflectionException( "Unable to locate class [" + AUTH_CLASS_NAME + "]", e );
+        }
+    }
+
 }
