@@ -51,10 +51,10 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 
 	public static final String SETTINGS_LOCATION_OVERRIDE = "maven.settings";
 
-	private ConcurrentHashMap<String,Authentication> repositoryAuthenticationMap;
+	private ConcurrentHashMap<String,MavenAuthentication> repositoryAuthenticationMap;
 
 	@Override
-	public Authentication determineAuthentication(RemoteRepository remoteRepository) {
+	public MavenAuthentication determineAuthentication(MavenRepository remoteRepository) {
 		if ( repositoryAuthenticationMap == null ) {
 			loadRepositoryAuthenticationMap();
 		}
@@ -63,7 +63,7 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 	}
 
 	private void loadRepositoryAuthenticationMap() {
-		repositoryAuthenticationMap = new ConcurrentHashMap<String, Authentication>();
+		repositoryAuthenticationMap = new ConcurrentHashMap<String, MavenAuthentication>();
 
 		final File settingsFile = determineSettingsFileLocation();
 		try {
@@ -79,7 +79,7 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 					if ( id == null ) {
 						continue;
 					}
-					final Authentication authentication = new Authentication();
+					final MavenAuthentication authentication = new MavenAuthentication();
 					authentication.setUserName( extractValue( serverElement.element( "username" ) ) );
 					authentication.setPassword( extractValue( serverElement.element( "password" ) ) );
 					authentication.setPrivateKey( extractValue( serverElement.element( "privateKey" ) ) );

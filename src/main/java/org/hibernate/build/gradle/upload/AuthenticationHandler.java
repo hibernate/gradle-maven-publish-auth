@@ -23,16 +23,14 @@
  */
 package org.hibernate.build.gradle.upload;
 
-import org.apache.maven.artifact.ant.Authentication;
-import org.apache.maven.artifact.ant.RemoteRepository;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.maven.MavenDeployer;
 import org.gradle.api.tasks.Upload;
 
 /**
  * Acts as the main authentication coordinator for the upload.  It will delegate to all {@link AuthenticationProvider}
- * instances registered with the {@link AuthenticationProviderRegistry} looking for any that provide
- * {@link Authentication} against the given {@link RemoteRepository} defined for each upload task.
+ * instances registered with the {@link AuthenticationProviderRegistry} looking for any that provide authentication
+ * against the maven repository defined for each upload task.
  * <p/>
  * <strong>
  *     IMPL NOTE : This will need to change drastically whenever Gradle moves to its {@code Publication} scheme for uploads.
@@ -53,16 +51,18 @@ public class AuthenticationHandler implements Action<Upload> {
 		upload.getRepositories().withType( MavenDeployer.class ).all(
 				new Action<MavenDeployer>() {
 					public void execute(MavenDeployer deployer) {
-						final RemoteRepository repository = (RemoteRepository) deployer.getRepository();
-						if ( repository != null ) {
-							final Authentication authentication = locateAuthenticationDetails( repository );
+						final Object repositoryDelegate = deployer.getRepository();
+						if ( repositoryDelegate != null ) {
+							final MavenRepository repository = new MavenRepository( repositoryDelegate );
+							final MavenAuthentication authentication = locateAuthenticationDetails( repository );
 							if ( authentication != null ) {
 								repository.addAuthentication( authentication );
 							}
 						}
-						final RemoteRepository snapshotRepository = (RemoteRepository) deployer.getSnapshotRepository();
-						if ( snapshotRepository != null ) {
-							final Authentication authentication = locateAuthenticationDetails( snapshotRepository );
+						final Object snapshotRepositoryDelegate = deployer.getSnapshotRepository();
+						if ( snapshotRepositoryDelegate != null ) {
+							final MavenRepository snapshotRepository = new MavenRepository( snapshotRepositoryDelegate );
+							final MavenAuthentication authentication = locateAuthenticationDetails( snapshotRepository );
 							if ( authentication != null ) {
 								snapshotRepository.addAuthentication( authentication );
 							}
@@ -72,9 +72,9 @@ public class AuthenticationHandler implements Action<Upload> {
 		);
 	}
 
-	private Authentication locateAuthenticationDetails(RemoteRepository repository) {
+	private MavenAuthentication locateAuthenticationDetails(MavenRepository repository) {
 		for ( AuthenticationProvider provider : authenticationProviderRegistry.providers() ) {
-			Authentication authentication = provider.determineAuthentication( repository );
+			MavenAuthentication authentication = provider.determineAuthentication( repository );
 			if ( authentication != null ) {
 				return authentication;
 			}

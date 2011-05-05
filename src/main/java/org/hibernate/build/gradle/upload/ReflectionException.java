@@ -1,7 +1,7 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * Copyright (c) 2011, Red Hat Inc. or third-party contributors as
+ * Copyright (c) 2010, Red Hat Inc. or third-party contributors as
  * indicated by the @author tags or express copyright attribution
  * statements applied by the authors.  All third-party contributions are
  * distributed under license by Red Hat Inc.
@@ -24,19 +24,14 @@
 package org.hibernate.build.gradle.upload;
 
 /**
- * Contract for providers of authentication details for authenticating against remote repositories.
- *
  * @author Steve Ebersole
  */
-public interface AuthenticationProvider {
-	/**
-	 * The contract method.  Given a repository, determine the authentication according to this provider's
-	 * contract.  Return {@literal null} to indicate no authentication applied for this repository by this
-	 * provider.
-	 *
-	 * @param mavenRepository The repository to check for authentication details.
-	 *
-	 * @return The authentication details, or {@literal null} to indicate none.
-	 */
-	public MavenAuthentication determineAuthentication(MavenRepository mavenRepository);
+public class ReflectionException extends RuntimeException {
+	public ReflectionException(String message) {
+		super( message );
+	}
+
+	public ReflectionException(String message, Throwable cause) {
+		super( message, cause );
+	}
 }
