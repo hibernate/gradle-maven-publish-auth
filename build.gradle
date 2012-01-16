@@ -12,8 +12,8 @@ defaultTasks 'build'
 repositories {
     mavenCentral()
     mavenLocal()
-    mavenRepo name: 'jboss-nexus', urls: "https://repository.jboss.org/nexus/content/groups/public/"
-    mavenRepo name: "jboss-snapshots", urls: "http://snapshots.jboss.org/maven2/"
+    mavenRepo name: 'jboss-nexus', url: "https://repository.jboss.org/nexus/content/groups/public/"
+    mavenRepo name: "jboss-snapshots", url: "http://snapshots.jboss.org/maven2/"
 }
 
 configurations {
@@ -32,13 +32,15 @@ dependencies {
     deployerJars 'org.apache.maven.wagon:wagon-http:1.0-beta-6'
 }
 
-ideaProject {
-    javaVersion = "1.6"
-    withXml { provider ->
-        def node = provider.asNode()
-        def vcsConfig = node.component.find { it.'@name' == 'VcsDirectoryMappings' }
-        vcsConfig.mapping[0].'@vcs' = 'Git'
-    }
+idea {
+	project {
+		jdkName "1.6"
+		ipr {
+			withXml { provider ->
+				provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git'
+			}
+		}
+	}
 }
 
 ideaModule {
@@ -124,3 +126,7 @@ uploadArchives {
     }
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-7'
+}
