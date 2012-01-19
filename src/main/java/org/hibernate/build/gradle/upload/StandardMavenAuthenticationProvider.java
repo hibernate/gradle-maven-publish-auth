@@ -29,12 +29,17 @@ import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.maven.artifact.ant.Authentication;
-import org.apache.maven.artifact.ant.RemoteRepository;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.sonatype.plexus.components.cipher.DefaultPlexusCipher;
+import org.sonatype.plexus.components.cipher.PlexusCipherException;
+import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
+import org.sonatype.plexus.components.sec.dispatcher.SecDispatcherException;
+import org.sonatype.plexus.components.sec.dispatcher.SecUtil;
+import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
 import org.xml.sax.InputSource;
 
 import org.slf4j.Logger;
@@ -62,9 +67,36 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 		return repositoryAuthenticationMap.get( remoteRepository.getId() );
 	}
 
+	private PasswordReader determinePasswordReader() {
+		final File securitySettingsFile = determineSecuritySettingsFileLocation();
+		final String masterPasswordEntry = securitySettingsFile.exists()
+				? extractMasterPassword( securitySettingsFile )
+				: null;
+
+		System.out.println( "master password entry : " + masterPasswordEntry );
+
+		return masterPasswordEntry == null
+				? new BasicPasswordReader()
+				: new PlexusCipherPasswordReader( masterPasswordEntry );
+	}
+
+	private String extractMasterPassword(File securitySettingsFile) {
+		try {
+			SettingsSecurity settingsSecurity = SecUtil.read( securitySettingsFile.getAbsolutePath(), true );
+			return settingsSecurity == null
+					? null
+					: settingsSecurity.getMaster();
+		}
+		catch (SecDispatcherException e) {
+			log.warn( "Unable to read Maven security settings file", e );
+			return null;
+		}
+	}
+
 	private void loadRepositoryAuthenticationMap() {
 		repositoryAuthenticationMap = new ConcurrentHashMap<String, MavenAuthentication>();
 
+		final PasswordReader passwordReader = determinePasswordReader();
 		final File settingsFile = determineSettingsFileLocation();
 		try {
 			InputSource inputSource = new InputSource( new FileInputStream( settingsFile ) );
@@ -79,11 +111,7 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 					if ( id == null ) {
 						continue;
 					}
-					final MavenAuthentication authentication = new MavenAuthentication();
-					authentication.setUserName( extractValue( serverElement.element( "username" ) ) );
-					authentication.setPassword( extractValue( serverElement.element( "password" ) ) );
-					authentication.setPrivateKey( extractValue( serverElement.element( "privateKey" ) ) );
-					authentication.setPassphrase( extractValue( serverElement.element( "passphrase" ) ) );
+					final MavenAuthentication authentication = extractServerValues( serverElement, passwordReader );
 					repositoryAuthenticationMap.put( id, authentication );
 				}
 			}
@@ -96,7 +124,16 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 		}
 	}
 
-	private String extractValue(Element element) {
+	private MavenAuthentication extractServerValues(Element serverElement, PasswordReader passwordReader) {
+		final MavenAuthentication authentication = new MavenAuthentication();
+		authentication.setUserName( extractValue( serverElement.element( "username" ) ) );
+		authentication.setPassword( passwordReader.readPassword( serverElement.element( "password" ) ) );
+		authentication.setPrivateKey( extractValue( serverElement.element( "privateKey" ) ) );
+		authentication.setPassphrase( extractValue( serverElement.element( "passphrase" ) ) );
+		return authentication;
+	}
+
+	private static String extractValue(Element element) {
 		if ( element == null ) {
 			return null;
 		}
@@ -110,15 +147,80 @@ public class StandardMavenAuthenticationProvider implements AuthenticationProvid
 	}
 
 	private SAXReader buildSAXReader() {
-		SAXReader saxReader = new SAXReader();
+		SAXReader saxReader = new SAXReader( new DocumentFactory() );
 		saxReader.setMergeAdjacentText( true );
 		return saxReader;
 	}
 
+	private File determineSecuritySettingsFileLocation() {
+		final String defaultLocation = "~/.m2/settings-security.xml";
+		final String location = System.getProperty( DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION, defaultLocation );
+		return new File( normalizePath( location ) );
+	}
+
+	private static String normalizePath(String path) {
+		if ( path.startsWith( "~" ) ) {
+			path = System.getProperty( "user.home" ) + path.substring( 1 );
+		}
+		return path;
+	}
+
 	private File determineSettingsFileLocation() {
-		final String overrideLocation = System.getProperty( SETTINGS_LOCATION_OVERRIDE );
-		return overrideLocation == null
-				? new File( new File( System.getProperty( "user.home" ), ".m2" ), "settings.xml" )
-				: new File( overrideLocation );
+		final String defaultLocation = "~/.m2/settings.xml";
+		final String location = System.getProperty( SETTINGS_LOCATION_OVERRIDE, defaultLocation );
+		return new File( normalizePath( location ) );
+	}
+
+	private static interface PasswordReader {
+		public String readPassword(Element passwordElement);
+	}
+
+	private static class BasicPasswordReader implements PasswordReader {
+		@Override
+		public String readPassword(Element passwordElement) {
+			return extractValue( passwordElement );
+		}
+	}
+
+	private static class PlexusCipherPasswordReader implements PasswordReader {
+		private final DefaultPlexusCipher cipher;
+		private final String master;
+
+		private PlexusCipherPasswordReader(String master) {
+			this.cipher = buildCipher();
+			this.master = decryptMaster( master, cipher );
+		}
+
+		private static DefaultPlexusCipher buildCipher() {
+			try {
+				return new DefaultPlexusCipher();
+			}
+			catch (PlexusCipherException e) {
+				log.error( "Unable to create PlexusCipher in order to decrypt Maven passwords" );
+				return null;
+			}
+		}
+
+		private static String decryptMaster(String master, DefaultPlexusCipher cipher) {
+			try {
+				return cipher.decryptDecorated( master, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION );
+			}
+			catch (PlexusCipherException e) {
+				log.error( "Unable to create PlexusCipher in order to decrypt Maven passwords" );
+				return null;
+			}
+		}
+
+		@Override
+		public String readPassword(Element passwordElement) {
+			final String value = extractValue( passwordElement );
+			try {
+				return cipher.decryptDecorated( value, master );
+			}
+			catch (PlexusCipherException e) {
+				log.warn( "Unable to decrypt Maven password using PlexusCipher", e );
+				return value;
+			}
+		}
 	}
 }

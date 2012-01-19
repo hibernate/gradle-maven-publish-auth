@@ -5,7 +5,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = 'org.hibernate.build.gradle'
-version = '1.0.3-SNAPSHOT'
+version = '1.1.0-SNAPSHOT'
 
 defaultTasks 'build'
 
@@ -26,6 +26,8 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'dom4j:dom4j:1.6.1@jar'
+	compile 'org.sonatype.plexus:plexus-sec-dispatcher:1.3'
+	runtime 'org.codehaus.plexus:plexus-container-default:1.0.0'
 
     groovy localGroovy()
 
@@ -35,6 +37,7 @@ dependencies {
 idea {
 	project {
 		jdkName "1.6"
+		languageLevel "1.6"
 		ipr {
 			withXml { provider ->
 				provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git'
@@ -73,7 +76,7 @@ uploadArchives.dependsOn install
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def pomConfig = {
+pomConfig = {
     url 'http://hibernate.org'
     organization {
         name 'Hibernate.org'
@@ -128,5 +131,6 @@ uploadArchives {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.0-milestone-7'
+//	gradleVersion = '1.0-milestone-7'
+	gradleVersion = '1.0-milestone-8-20120118143143+0100'
 }
