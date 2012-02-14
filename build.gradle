@@ -77,6 +77,8 @@ uploadArchives.dependsOn install
 
 
 pomConfig = {
+	name 'gradle-upload-auth-plugin'
+	description 'Gradle plugin for managing authentication against maven based remoted repositories on upload'
     url 'http://hibernate.org'
     organization {
         name 'Hibernate.org'
