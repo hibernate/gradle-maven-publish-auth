@@ -5,7 +5,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = 'org.hibernate.build.gradle'
-version = '1.1.0-SNAPSHOT'
+version = '1.1.0'
 
 defaultTasks 'build'
 
@@ -131,6 +131,5 @@ uploadArchives {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 task wrapper(type: Wrapper) {
-//	gradleVersion = '1.0-milestone-7'
-	gradleVersion = '1.0-milestone-8-20120118143143+0100'
+	gradleVersion = '1.0-milestone-8'
 }
