@@ -1,11 +1,11 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'maven' // for install task as well as deploy dependencies
+apply plugin: 'maven-publish'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 group = 'org.hibernate.build.gradle'
-version = '1.1.2-SNAPSHOT'
+version = '2.0.0-SNAPSHOT'
 
 defaultTasks 'build'
 
@@ -30,8 +30,6 @@ dependencies {
 	runtime 'org.codehaus.plexus:plexus-container-default:1.0.0'
 
     groovy localGroovy()
-
-    deployerJars 'org.apache.maven.wagon:wagon-http:1.0-beta-6'
 }
 
 idea {
@@ -57,57 +55,9 @@ manifest.mainAttributes(
     'Implementation-Vendor-Id': 'org.hibernate'
 )
 
-// sources.jar ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-task sourcesJar(type: Jar, dependsOn: compileJava) {
+task sourceJar(type: Jar, dependsOn: compileJava) {
     from sourceSets.main.allSource
     classifier = 'sources'
-}
-artifacts {
-    archives sourcesJar
-}
-uploadArchives.dependsOn sourcesJar
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-// Maven stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    would be fantabulous if the maven plugin handled all this...
-assemble.doLast( { install } )
-uploadArchives.dependsOn install
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-pomConfig = {
-	name 'gradle-upload-auth-plugin'
-	description 'Gradle plugin for managing authentication against maven based remoted repositories on upload'
-    url 'http://hibernate.org'
-    organization {
-        name 'Hibernate.org'
-        url 'http://hibernate.org'
-    }
-    issueManagement {
-        system 'github'
-        url 'https://github.com/sebersole/gradle-upload-auth-plugin/issues'
-    }
-    scm {
-	url "https://github.com/sebersole/gradle-upload-auth-plugin"
-	connection "scm:git:https://sebersole@github.com/sebersole/gradle-upload-auth-plugin.git"
-	developerConnection "scm:git:git@github.com:sebersole/gradle-upload-auth-plugin.git"
-    }
-    licenses {
-	license {
-	    name 'GNU Lesser General Public License'
-	    url 'http://www.gnu.org/licenses/lgpl-2.1.html'
-	    distribution 'repo'
-	}
-    }
-    developers {
-        developer {
-            id 'sebersole'
-            name 'Steve Ebersole'
-            organization 'Hibernate'
-            organizationUrl 'http://hibernate.org'
-        }
-    }
 }
 
 // This is the kind of malarkey this plugin tries to address ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,21 +67,65 @@ if ( ! hasProperty( "JBOSS_REPO_USER" ) ) {
 if ( ! hasProperty( "JBOSS_REPO_PASS" ) ) {
     JBOSS_REPO_PASS = "";
 }
-uploadArchives {
-    repositories.mavenDeployer {
-        name = 'jbossDeployer'
-        configuration = configurations.deployerJars
-        pom.project pomConfig
-        repository(id: "jboss-releases-repository", url: "https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/") {
-            authentication(userName: JBOSS_REPO_USER, password: JBOSS_REPO_PASS)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+
+            pom.withXml {
+                def Node root = asNode();
+                root.appendNode('description', 'Gradle plugin for managing authentication against maven based remote repositories')
+                root.appendNode('url', 'https://github.com/sebersole/gradle-upload-auth-plugin')
+
+                def org = root.appendNode( 'organization' )
+                org.appendNode( 'name', 'Hibernate.org' )
+                org.appendNode( 'url', 'http://hibernate.org' )
+
+                def issues = root.appendNode( 'issueManagement' )
+                issues.appendNode( 'system', 'github' )
+                issues.appendNode( 'url', 'https://github.com/sebersole/gradle-upload-auth-plugin/issues' )
+
+                def scm = root.appendNode( 'scm' )
+                scm.appendNode( 'url', 'https://github.com/sebersole/gradle-upload-auth-plugin' )
+                scm.appendNode( 'connection', 'scm:git:https://sebersole@github.com/sebersole/gradle-upload-auth-plugin.git' )
+                scm.appendNode( 'developerConnection', 'scm:git:git@github.com:sebersole/gradle-upload-auth-plugin.git' )
+
+                def license = root.appendNode( 'licenses' ).appendNode( 'license' );
+                license.appendNode( 'name', 'GNU Lesser General Public License' )
+                license.appendNode( 'url', 'http://www.gnu.org/licenses/lgpl-2.1.html' )
+                license.appendNode( 'distribution', 'repo' )
+
+                def dev = root.appendNode( 'developers' ).appendNode( 'developer' );
+                dev.appendNode( 'id', 'sebersole' )
+                dev.appendNode( 'name', 'Steve Ebersole' )
+                dev.appendNode( 'organization', 'Hibernate.org' )
+                dev.appendNode( 'organizationUrl', 'http://hibernate.org' )
+            }
         }
-        snapshotRepository(id: "jboss-snapshots-repository", url: "https://repository.jboss.org/nexus/content/repositories/snapshots") {
-            authentication(userName: JBOSS_REPO_USER, password: JBOSS_REPO_PASS)
+    }
+
+    repositories {
+        maven {
+            if ( project.version.endsWith( "SNAPSHOT" ) ) {
+                url 'https://repository.jboss.org/nexus/content/repositories/snapshots/'
+            }
+            else {
+                url 'https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/'
+            }
+            credentials {
+                username = JBOSS_REPO_USER
+                password = JBOSS_REPO_PASS
+            }
         }
     }
 }
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.0-milestone-8'
+	gradleVersion = '1.5'
 }
