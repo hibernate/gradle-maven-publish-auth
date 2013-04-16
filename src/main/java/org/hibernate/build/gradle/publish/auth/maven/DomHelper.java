@@ -1,7 +1,7 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * Copyright (c) 2011, Red Hat Inc. or third-party contributors as
+ * Copyright (c) 2013, Red Hat Inc. or third-party contributors as
  * indicated by the @author tags or express copyright attribution
  * statements applied by the authors.  All third-party contributions are
  * distributed under license by Red Hat Inc.
@@ -21,33 +21,27 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.hibernate.build.gradle.upload;
+package org.hibernate.build.gradle.publish.auth.maven;
 
-import java.util.LinkedList;
+import org.dom4j.Element;
 
 /**
- * A registry of {@link AuthenticationProvider} instances.
- *
  * @author Steve Ebersole
  */
-public class AuthenticationProviderRegistry {
-	private final LinkedList<AuthenticationProvider> authenticationProviders = buildStandardAuthenticationProviders();
-
-	private static LinkedList<AuthenticationProvider> buildStandardAuthenticationProviders() {
-		LinkedList<AuthenticationProvider> providers = new LinkedList<AuthenticationProvider>();
-		providers.add( new StandardMavenAuthenticationProvider() );
-		return providers;
+public class DomHelper {
+	private DomHelper() {
 	}
 
-	public void appendAuthenticationProvider(AuthenticationProvider provider) {
-		authenticationProviders.addLast( provider );
-	}
+	public static String extractValue(Element element) {
+		if ( element == null ) {
+			return null;
+		}
 
-	public void prependAuthenticationProvider(AuthenticationProvider provider) {
-		authenticationProviders.addFirst( provider );
-	}
+		final String value = element.getTextTrim();
+		if ( value != null && value.length() == 0 ) {
+			return null;
+		}
 
-	public Iterable<AuthenticationProvider> providers() {
-		return authenticationProviders;
+		return value;
 	}
 }

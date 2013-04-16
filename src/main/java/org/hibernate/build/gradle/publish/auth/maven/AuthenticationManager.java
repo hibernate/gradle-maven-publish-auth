@@ -21,50 +21,25 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.hibernate.build.gradle.upload;
+package org.hibernate.build.gradle.publish.auth.maven;
+
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 
 /**
- * A wrapper around the {@link org.apache.maven.artifact.ant.Authentication} class from the maven ant tasks due to
- * some change in Gradle causing classloader problems.
+ * Manages authentication aspects of artifact publishing.
  *
  * @author Steve Ebersole
  */
-public class MavenAuthentication {
+public class AuthenticationManager implements Plugin<Project> {
+	@Override
+	public void apply(final Project project) {
+		final CredentialsProviderRegistry registry = new CredentialsProviderRegistry();
 
-    private String userName;
-    private String password;
-    private String privateKey;
-    private String passphrase;
+		final PublishingAuthenticationHandler publishingHandler = new PublishingAuthenticationHandler( registry );
+		publishingHandler.applyTo( project );
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String username) {
-        this.userName = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+		final LegacyAuthenticationHandler legacyHandler = new LegacyAuthenticationHandler( registry );
+		legacyHandler.applyTo( project );
 	}
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public String getPassphrase() {
-        return passphrase;
-    }
-
-    public void setPassphrase(String passphrase) {
-        this.passphrase = passphrase;
-    }
 }

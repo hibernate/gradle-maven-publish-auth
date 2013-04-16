@@ -21,38 +21,48 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.hibernate.build.gradle.upload;
-
-import org.gradle.api.Action;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.tasks.Upload;
+package org.hibernate.build.gradle.publish.auth.maven;
 
 /**
- * Manages authentication aspects of artifact uploading by delegation to registered {@link AuthenticationProvider}
- * instances.
+ * Describes authentication credentials.
  *
  * @author Steve Ebersole
  */
-public class UploadAuthenticationManager implements Plugin<Project> {
+public class Credentials {
+    private String userName;
+    private String password;
+    private String privateKey;
+    private String passphrase;
 
-	@Override
-	public void apply(final Project project) {
-		// todo : ideally the registry would be handled by a convention to allow configuration (aka, adding more providers)...
-		//		for our purposes here in Hibernate we only care about the Maven settings.xml based way so we
-		//		code for just that.
-		final AuthenticationProviderRegistry registry = new AuthenticationProviderRegistry();
-		final Action authenticationHandler = new AuthenticationHandler( registry );
+    public String getUserName() {
+        return userName;
+    }
 
-		project.getTasks().withType( Upload.class ).all(
-			new Action<Upload>() {
-				@Override
-				@SuppressWarnings( {"unchecked"})
-				public void execute(final Upload uploadTask) {
-					uploadTask.doFirst( authenticationHandler );
-				}
-			}
-		);
+    public void setUserName(String username) {
+        this.userName = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
 	}
 
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getPassphrase() {
+        return passphrase;
+    }
+
+    public void setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+    }
 }

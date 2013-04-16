@@ -1,7 +1,7 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * Copyright (c) 2011, Red Hat Inc. or third-party contributors as
+ * Copyright (c) 2013, Red Hat Inc. or third-party contributors as
  * indicated by the @author tags or express copyright attribution
  * statements applied by the authors.  All third-party contributions are
  * distributed under license by Red Hat Inc.
@@ -21,22 +21,22 @@
  * 51 Franklin Street, Fifth Floor
  * Boston, MA  02110-1301  USA
  */
-package org.hibernate.build.gradle.upload;
+package org.hibernate.build.gradle.publish.auth.maven;
+
+import org.dom4j.Element;
 
 /**
- * Contract for providers of authentication details for authenticating against remote repositories.
+ * Contract for reading a password from the Maven {@code settings.xml} file.
  *
  * @author Steve Ebersole
  */
-public interface AuthenticationProvider {
+public interface PasswordReader {
 	/**
-	 * The contract method.  Given a repository, determine the authentication according to this provider's
-	 * contract.  Return {@literal null} to indicate no authentication applied for this repository by this
-	 * provider.
+	 * Read the password from the password element.
 	 *
-	 * @param mavenRepository The repository to check for authentication details.
+	 * @param passwordElement The password DOM element
 	 *
-	 * @return The authentication details, or {@literal null} to indicate none.
+	 * @return The read password.
 	 */
-	public MavenAuthentication determineAuthentication(MavenRepository mavenRepository);
+	public String readPassword(Element passwordElement);
 }

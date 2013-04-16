@@ -80,6 +80,7 @@ publishing {
 
             pom.withXml {
                 def Node root = asNode();
+                root.appendNode('artifactId', 'gradle-maven-publish-auth')
                 root.appendNode('description', 'Gradle plugin for managing authentication against maven based remote repositories')
                 root.appendNode('url', 'https://github.com/sebersole/gradle-upload-auth-plugin')
 
