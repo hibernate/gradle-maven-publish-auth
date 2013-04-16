@@ -50,7 +50,7 @@ public class PasswordReaderFactory {
 				? extractMasterPassword( securitySettingsFile )
 				: null;
 
-		System.out.println( "master password entry : " + masterPasswordEntry );
+		log.trace( "master password entry : " + masterPasswordEntry );
 
 		return masterPasswordEntry == null
 				? new BasicPasswordReader()

@@ -38,11 +38,8 @@ Support for the new Gradle Publication DSL
 One of the new (and still ongoing and incubating) developments in Gradle is the new Publication DSL as the means for
 declaring how your project artifacts are pulished.  See the Gradle UserGuide for more information.
 
-The "bridge" between Maven authentication credentials and Gradle is the repository id.  The Publication DSL removed
-the explicit capability of repositories for publising having a built-in identifier.  So you will need to leverage the
-"extension properties capability" to define that identifier.
-
-For an example, lets assume you have a Maven settings.xml that defines the following credentials:
+The "bridge" between Maven authentication credentials and Gradle is the repository id.  For an example, lets assume
+you have a Maven settings.xml that defines the following credentials:
 
     <settings>
         <servers>
@@ -56,7 +53,7 @@ For an example, lets assume you have a Maven settings.xml that defines the follo
 
 As you can see, we have credentials associated with a repository server with the identifier of
 "jboss-developer-repository-group".  This is the information we need supply in order for the plugin to make the
-connection.
+connection.  In the Publication DSL, this corelates to the `name` attribute of the repository configuration:
 
     publishing {
         repositories {

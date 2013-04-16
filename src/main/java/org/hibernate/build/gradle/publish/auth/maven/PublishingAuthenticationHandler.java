@@ -26,7 +26,7 @@ package org.hibernate.build.gradle.publish.auth.maven;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
-import org.gradle.api.internal.plugins.DefaultExtraPropertiesExtension;
+import org.gradle.api.plugins.ExtraPropertiesExtension;
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository;
 
 /**
@@ -58,12 +58,7 @@ public class PublishingAuthenticationHandler implements Action<PublishToMavenRep
 	@Override
 	public void execute(PublishToMavenRepository publishToMavenRepository) {
 		final MavenArtifactRepository mavenRepo = publishToMavenRepository.getRepository();
-		final DefaultExtraPropertiesExtension enhancedMavenRepo = (DefaultExtraPropertiesExtension) mavenRepo;
-		if ( ! enhancedMavenRepo.has( "id" ) ) {
-			return;
-		}
-
-		final String id = (String) enhancedMavenRepo.get( "id" );
+		final String id = mavenRepo.getName();
 		final Credentials credentials = locateAuthenticationCredentials( id );
 		if ( credentials == null ) {
 			return;
