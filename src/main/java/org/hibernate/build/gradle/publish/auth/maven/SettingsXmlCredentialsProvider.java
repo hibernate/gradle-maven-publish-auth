@@ -26,6 +26,7 @@ package org.hibernate.build.gradle.publish.auth.maven;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,24 +58,40 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	private final ConcurrentHashMap<String,Credentials> credentialsByRepoIdMap;
 
 	private SettingsXmlCredentialsProvider() {
-		ConcurrentHashMap<String, Credentials> byIdMap = new ConcurrentHashMap<String, Credentials>();
+		final File settingsFile = determineSettingsFileLocation();
+		this.credentialsByRepoIdMap = extractCredentialsFromSettings( settingsFile );
+	}
+
+	private File determineSettingsFileLocation() {
+		final String defaultLocation = "~/.m2/settings.xml";
+		final String location = System.getProperty( SETTINGS_LOCATION_OVERRIDE, defaultLocation );
+		return new File( PathHelper.normalizePath( location ) );
+	}
+
+	private ConcurrentHashMap<String, Credentials> extractCredentialsFromSettings(File settingsFile) {
+		final ConcurrentHashMap<String, Credentials> byIdMap = new ConcurrentHashMap<String, Credentials>();
+
+		if ( ! settingsFile.exists() ) {
+			log.warn( "Maven settings.xml file did not exist : " + settingsFile.getAbsolutePath() );
+			// EARLY EXIT
+			return byIdMap;
+		}
 
 		final PasswordReader passwordReader = PasswordReaderFactory.INSTANCE.determinePasswordReader();
-		final File settingsFile = determineSettingsFileLocation();
 		try {
 			SAXReader saxReader = buildSAXReader();
 			InputSource inputSource = new InputSource( new FileInputStream( settingsFile ) );
 			try {
-				final Document document = saxReader.read( inputSource );
-				final Element settingsElement = document.getRootElement();
-				final Element serversElement = settingsElement.element( "servers" );
-				final Iterator serversIterator = serversElement.elementIterator( "server" );
-				while ( serversIterator.hasNext() ) {
-					final Element serverElement = (Element) serversIterator.next();
+				final Iterator<Element> serverIterator = seekServerElements( saxReader.read( inputSource ) );
+				while ( serverIterator.hasNext() ) {
+					final Element serverElement = serverIterator.next();
 					final String id = DomHelper.extractValue( serverElement.element( "id" ) );
 					if ( id == null ) {
 						continue;
 					}
+
+					log.debug( "Adding credentials for server : " + id );
+
 					final Credentials authentication = extractCredentials( serverElement, passwordReader );
 					byIdMap.put( id, authentication );
 				}
@@ -87,13 +104,7 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 			log.info( "Unable to locate Maven settings.xml" );
 		}
 
-		credentialsByRepoIdMap = byIdMap;
-	}
-
-	private File determineSettingsFileLocation() {
-		final String defaultLocation = "~/.m2/settings.xml";
-		final String location = System.getProperty( SETTINGS_LOCATION_OVERRIDE, defaultLocation );
-		return new File( PathHelper.normalizePath( location ) );
+		return byIdMap;
 	}
 
 	private SAXReader buildSAXReader() {
@@ -109,6 +120,19 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 		authentication.setPrivateKey( DomHelper.extractValue( serverElement.element( "privateKey" ) ) );
 		authentication.setPassphrase( DomHelper.extractValue( serverElement.element( "passphrase" ) ) );
 		return authentication;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Iterator<Element> seekServerElements(Document document) {
+		final Element settingsElement = document.getRootElement();
+		if ( settingsElement != null ) {
+			final Element serversElement = settingsElement.element( "servers" );
+			if ( serversElement != null ) {
+				return serversElement.elementIterator( "server" );
+			}
+		}
+
+		return Collections.<Element>emptyList().iterator();
 	}
 
 	@Override
