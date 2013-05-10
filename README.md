@@ -52,13 +52,13 @@ you have a Maven settings.xml that defines the following credentials:
     </settings>
 
 As you can see, we have credentials associated with a repository server with the identifier of
-"jboss-developer-repository-group".  This is the information we need supply in order for the plugin to make the
+"dogdeball-repo".  This is the information we need supply in order for the plugin to make the
 connection.  In the Publication DSL, this corelates to the `name` attribute of the repository configuration:
 
     publishing {
         repositories {
             maven {
-                ext.id = 'dogdeball-repo'
+                name = 'dogdeball-repo'
                 url 'http://repository.average.joes.com'
             }
         }
