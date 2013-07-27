@@ -43,6 +43,6 @@ public class AuthenticationManager implements Plugin<Project> {
 		legacyHandler.applyTo( project );
 
 		final RepositoryAuthenticationHandler repositoryHandler = new RepositoryAuthenticationHandler( registry );
-		repositoryHandler.applyTo(project);
+		repositoryHandler.applyTo( project );
 	}
 }

@@ -36,7 +36,7 @@ Support for the new Gradle Publication DSL
 ------------------------------------------
 
 One of the new (and still ongoing and incubating) developments in Gradle is the new Publication DSL as the means for
-declaring how your project artifacts are pulished.  See the Gradle UserGuide for more information.
+declaring how your project artifacts are published.  See the Gradle UserGuide for more information.
 
 The "bridge" between Maven authentication credentials and Gradle is the repository id.  For an example, lets assume
 you have a Maven settings.xml that defines the following credentials:

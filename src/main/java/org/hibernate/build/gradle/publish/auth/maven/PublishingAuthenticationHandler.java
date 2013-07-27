@@ -26,7 +26,7 @@ package org.hibernate.build.gradle.publish.auth.maven;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
-import org.gradle.api.plugins.ExtraPropertiesExtension;
+import org.gradle.api.artifacts.repositories.PasswordCredentials;
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository;
 
 /**
@@ -64,8 +64,9 @@ public class PublishingAuthenticationHandler implements Action<PublishToMavenRep
 			return;
 		}
 
-		publishToMavenRepository.getRepository().getCredentials().setUsername( credentials.getUserName() );
-		publishToMavenRepository.getRepository().getCredentials().setPassword( credentials.getPassword() );
+		PasswordCredentials passwordCredentials = publishToMavenRepository.getRepository().getCredentials();
+		passwordCredentials.setUsername( credentials.getUserName() );
+		passwordCredentials.setPassword( credentials.getPassword() );
 	}
 
 	private Credentials locateAuthenticationCredentials(String repositoryId) {

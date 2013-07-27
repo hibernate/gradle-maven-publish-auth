@@ -28,8 +28,6 @@ dependencies {
     compile 'dom4j:dom4j:1.6.1@jar'
 	compile 'org.sonatype.plexus:plexus-sec-dispatcher:1.3'
 	runtime 'org.codehaus.plexus:plexus-container-default:1.0.0'
-
-    groovy localGroovy()
 }
 
 idea {
@@ -62,10 +60,10 @@ task sourceJar(type: Jar, dependsOn: compileJava) {
 
 // This is the kind of malarkey this plugin tries to address ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if ( ! hasProperty( "JBOSS_REPO_USER" ) ) {
-    JBOSS_REPO_USER = "";
+    ext.JBOSS_REPO_USER = "";
 }
 if ( ! hasProperty( "JBOSS_REPO_PASS" ) ) {
-    JBOSS_REPO_PASS = "";
+    ext.JBOSS_REPO_PASS = "";
 }
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -129,4 +127,8 @@ publishing {
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '1.5'
+}
+
+tasks.withType(Compile) {
+    options.compilerArgs << "-Xlint:unchecked"
 }

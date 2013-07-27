@@ -54,7 +54,7 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 		project.getTasks().withType( Upload.class ).all(
 				new Action<Upload>() {
 					@Override
-					@SuppressWarnings( {"unchecked"})
+					@SuppressWarnings( {"unchecked"} )
 					public void execute(final Upload uploadTask) {
 						if ( ! uploadTask.getRepositories().withType( MavenDeployer.class ).isEmpty() ) {
 							uploadTask.doFirst( authAction );
@@ -68,6 +68,7 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 	public void execute(Upload upload) {
 		upload.getRepositories().withType( MavenDeployer.class ).all(
 				new Action<MavenDeployer>() {
+					@Override
 					public void execute(MavenDeployer deployer) {
 						final Object repositoryDelegate = deployer.getRepository();
 						if ( repositoryDelegate != null ) {
@@ -206,6 +207,7 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 			return idGetterMethod;
 		}
 
+		@SuppressWarnings( {"unchecked"} )
 		private Method locateIdGetterMethod() {
 			try {
 				return getRemoteRepositoryClass().getMethod( "getId" );
@@ -224,6 +226,7 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 			return urlGetterMethod;
 		}
 
+		@SuppressWarnings( {"unchecked"} )
 		private Method locateUrlGetterMethod() {
 			try {
 				return getRemoteRepositoryClass().getMethod( "getUrl" );
@@ -242,6 +245,7 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 			return addAuthenticationMethod;
 		}
 
+		@SuppressWarnings( {"unchecked"} )
 		private Method locateAuthenticationAdderMethod() {
 			try {
 				return getRemoteRepositoryClass().getMethod( "addAuthentication", getAuthClass() );
@@ -345,14 +349,14 @@ public class LegacyAuthenticationHandler implements Action<Upload> {
 		private static final String AUTH_CLASS_NAME = "org.apache.maven.artifact.ant.Authentication";
 		private Class authClass;
 
-		public Class getAuthClass() {
+		public Class<?> getAuthClass() {
 			if ( authClass == null ) {
 				authClass = locateAuthClass();
 			}
 			return authClass;
 		}
 
-		private Class locateAuthClass() {
+		private Class<?> locateAuthClass() {
 			try {
 				return classLoader.loadClass( AUTH_CLASS_NAME );
 			}
