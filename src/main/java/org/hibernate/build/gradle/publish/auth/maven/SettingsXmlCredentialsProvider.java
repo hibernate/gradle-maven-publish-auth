@@ -35,10 +35,10 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.xml.sax.InputSource;
-
+import org.hibernate.build.gradle.publish.auth.maven.passwordprocessor.PasswordProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
 /**
  * Provider of credentials based on standard Maven conventions using {@literal settings.xml}.
@@ -70,14 +70,12 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 
 	private ConcurrentHashMap<String, Credentials> extractCredentialsFromSettings(File settingsFile) {
 		final ConcurrentHashMap<String, Credentials> byIdMap = new ConcurrentHashMap<String, Credentials>();
-
 		if ( ! settingsFile.exists() ) {
 			log.warn( "Maven settings.xml file did not exist : " + settingsFile.getAbsolutePath() );
 			// EARLY EXIT
 			return byIdMap;
 		}
 
-		final PasswordReader passwordReader = PasswordReaderFactory.INSTANCE.determinePasswordReader();
 		try {
 			SAXReader saxReader = buildSAXReader();
 			InputSource inputSource = new InputSource( new FileInputStream( settingsFile ) );
@@ -92,7 +90,7 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 
 					log.debug( "Adding credentials for server : " + id );
 
-					final Credentials authentication = extractCredentials( serverElement, passwordReader );
+					final Credentials authentication = extractCredentials( serverElement );
 					byIdMap.put( id, authentication );
 				}
 			}
@@ -113,10 +111,13 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 		return saxReader;
 	}
 
-	private Credentials extractCredentials(Element serverElement, PasswordReader passwordReader) {
+	private Credentials extractCredentials(Element serverElement) {
+		String passwordValue = DomHelper.extractValue( serverElement.element( "password" ) );
+		String password = PasswordProcessor.getInstance( passwordValue ).processPassword();
+
 		final Credentials authentication = new Credentials();
 		authentication.setUserName( DomHelper.extractValue( serverElement.element( "username" ) ) );
-		authentication.setPassword( passwordReader.readPassword( serverElement.element( "password" ) ) );
+		authentication.setPassword( password );
 		authentication.setPrivateKey( DomHelper.extractValue( serverElement.element( "privateKey" ) ) );
 		authentication.setPassphrase( DomHelper.extractValue( serverElement.element( "passphrase" ) ) );
 		return authentication;
