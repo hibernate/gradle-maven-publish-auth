@@ -79,3 +79,26 @@ Again, the bridge is the repository id.
         }
     }
 
+Support for downloading artifacts
+----------------------------------
+
+Plugin also allows to download artifacts from authenticated Maven repositories without adding credentials directly
+in build file. Again, the bridge is the repository id.
+
+    repositories {
+        maven {
+                name = 'dogdeball-repo'
+                url 'http://repository.average.joes.com'
+        }
+    }
+
+Currently plugin does not apply authentication information to buildscript repositories, so following won't work:
+
+    buildscript {
+        repositories {
+            maven {
+                name = 'dogdeball-repo'
+                url 'http://repository.average.joes.com'
+            }
+        }
+    }

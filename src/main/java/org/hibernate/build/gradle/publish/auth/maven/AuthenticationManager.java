@@ -41,5 +41,8 @@ public class AuthenticationManager implements Plugin<Project> {
 
 		final LegacyAuthenticationHandler legacyHandler = new LegacyAuthenticationHandler( registry );
 		legacyHandler.applyTo( project );
+
+		final RepositoryAuthenticationHandler repositoryHandler = new RepositoryAuthenticationHandler( registry );
+		repositoryHandler.applyTo(project);
 	}
 }
