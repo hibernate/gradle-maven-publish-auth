@@ -48,16 +48,11 @@ import org.xml.sax.InputSource;
 public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	private static final Logger log = LoggerFactory.getLogger( SettingsXmlCredentialsProvider.class );
 
-	/**
-	 * Singleton access
-	 */
-	public static final SettingsXmlCredentialsProvider INSTANCE = new SettingsXmlCredentialsProvider();
-
 	public static final String SETTINGS_LOCATION_OVERRIDE = "maven.settings";
 
 	private final ConcurrentHashMap<String,Credentials> credentialsByRepoIdMap;
 
-	private SettingsXmlCredentialsProvider() {
+	public SettingsXmlCredentialsProvider() {
 		final File settingsFile = determineSettingsFileLocation();
 		this.credentialsByRepoIdMap = extractCredentialsFromSettings( settingsFile );
 	}

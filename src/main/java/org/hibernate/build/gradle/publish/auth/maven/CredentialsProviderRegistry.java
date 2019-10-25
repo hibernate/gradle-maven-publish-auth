@@ -36,7 +36,7 @@ public class CredentialsProviderRegistry {
 	private static LinkedList<CredentialsProvider> buildStandardAuthenticationProviders() {
 		LinkedList<CredentialsProvider> providers = new LinkedList<CredentialsProvider>();
 		// the standard provider
-		providers.add( SettingsXmlCredentialsProvider.INSTANCE );
+		providers.add( new SettingsXmlCredentialsProvider() );
 		return providers;
 	}
 
