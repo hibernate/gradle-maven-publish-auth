@@ -12,8 +12,14 @@ defaultTasks 'build'
 repositories {
     mavenCentral()
     mavenLocal()
-    mavenRepo name: 'jboss-nexus', url: "https://repository.jboss.org/nexus/content/groups/public/"
-    mavenRepo name: "jboss-snapshots", url: "https://snapshots.jboss.org/maven2/"
+    maven {
+        name 'jboss-nexus'
+        url "https://repository.jboss.org/nexus/content/groups/public/"
+    }
+    maven {
+        name "jboss-snapshots"
+        url "https://snapshots.jboss.org/maven2/"
+    }
 }
 
 configurations {
@@ -26,32 +32,32 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'dom4j:dom4j:1.6.1@jar'
-	compile 'org.sonatype.plexus:plexus-sec-dispatcher:1.3'
-	runtime 'org.codehaus.plexus:plexus-container-default:1.0.0'
+    compile 'org.sonatype.plexus:plexus-sec-dispatcher:1.3'
+    compile 'org.codehaus.plexus:plexus-container-default:1.0.0'
 }
 
 idea {
 	project {
 		jdkName "1.6"
 		languageLevel "1.6"
-		ipr {
-			withXml { provider ->
-				provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git'
-			}
-		}
+
+        vcs = 'Git'
 	}
 }
 
 ideaModule {
 }
 
-manifest.mainAttributes(
-    provider: 'gradle',
-    'Implementation-Url': 'https://hibernate.org',
-    'Implementation-Version': version,
-    'Implementation-Vendor': 'Hibernate.org',
-    'Implementation-Vendor-Id': 'org.hibernate'
-)
+jar {
+    manifest {
+        attributes(
+                'Implementation-Url': 'https://hibernate.org',
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'Hibernate.org',
+                'Implementation-Vendor-Id': 'org.hibernate'
+        )
+    }
+}
 
 task sourceJar(type: Jar, dependsOn: compileJava) {
     from sourceSets.main.allSource
@@ -125,10 +131,11 @@ publishing {
     }
 }
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '1.5'
+wrapper {
+    // To upgrade the version of gradle used in the wrapper, run:
+    //     ./gradlew wrapper --gradle-version NEW_VERSION
 }
 
-tasks.withType(Compile) {
+tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:unchecked"
 }
