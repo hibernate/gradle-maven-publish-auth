@@ -69,6 +69,8 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	}
 
 	private ConcurrentHashMap<String, Credentials> extractCredentialsFromSettings(File settingsFile) {
+		log.debug( "Maven settings.xml file for maven-publish-auth plugin : " + settingsFile.getAbsolutePath() );
+
 		final ConcurrentHashMap<String, Credentials> byIdMap = new ConcurrentHashMap<String, Credentials>();
 		if ( ! settingsFile.exists() ) {
 			log.warn( "Maven settings.xml file did not exist : " + settingsFile.getAbsolutePath() );
