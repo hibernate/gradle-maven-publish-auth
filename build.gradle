@@ -80,7 +80,7 @@ publishing {
                 def Node root = asNode();
                 root.appendNode('name', 'Gradle Plugin for Maven Publish Authentication')
                 root.appendNode('description', 'Gradle plugin for managing authentication against maven based remote repositories')
-                root.appendNode('url', 'https://github.com/sebersole/gradle-upload-auth-plugin')
+                root.appendNode('url', 'https://github.com/sebersole/gradle-maven-publish-auth')
 
                 def org = root.appendNode( 'organization' )
                 org.appendNode( 'name', 'Hibernate.org' )
@@ -88,12 +88,12 @@ publishing {
 
                 def issues = root.appendNode( 'issueManagement' )
                 issues.appendNode( 'system', 'github' )
-                issues.appendNode( 'url', 'https://github.com/sebersole/gradle-upload-auth-plugin/issues' )
+                issues.appendNode( 'url', 'https://github.com/sebersole/gradle-maven-publish-auth/issues' )
 
                 def scm = root.appendNode( 'scm' )
-                scm.appendNode( 'url', 'https://github.com/sebersole/gradle-upload-auth-plugin' )
-                scm.appendNode( 'connection', 'scm:git:https://sebersole@github.com/sebersole/gradle-upload-auth-plugin.git' )
-                scm.appendNode( 'developerConnection', 'scm:git:git@github.com:sebersole/gradle-upload-auth-plugin.git' )
+                scm.appendNode( 'url', 'https://github.com/sebersole/gradle-maven-publish-auth' )
+                scm.appendNode( 'connection', 'scm:git:https://sebersole@github.com/sebersole/gradle-maven-publish-auth.git' )
+                scm.appendNode( 'developerConnection', 'scm:git:git@github.com:sebersole/gradle-maven-publish-auth.git' )
 
                 def license = root.appendNode( 'licenses' ).appendNode( 'license' );
                 license.appendNode( 'name', 'GNU Lesser General Public License' )
