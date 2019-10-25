@@ -61,7 +61,7 @@ jar {
 
 task sourceJar(type: Jar, dependsOn: compileJava) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier.set( 'sources' )
 }
 
 // This is the kind of malarkey this plugin tries to address ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
