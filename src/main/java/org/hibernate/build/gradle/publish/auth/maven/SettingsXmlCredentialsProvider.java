@@ -38,6 +38,8 @@ import org.dom4j.io.SAXReader;
 import org.hibernate.build.gradle.publish.auth.maven.passwordprocessor.PasswordProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.gradle.api.Project;
 import org.xml.sax.InputSource;
 
 /**
@@ -48,18 +50,21 @@ import org.xml.sax.InputSource;
 public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	private static final Logger log = LoggerFactory.getLogger( SettingsXmlCredentialsProvider.class );
 
-	public static final String SETTINGS_LOCATION_OVERRIDE = "maven.settings";
+	public static final String SETTINGS_LOCATION_KEY = "maven.settings";
 
 	private final ConcurrentHashMap<String,Credentials> credentialsByRepoIdMap;
 
-	public SettingsXmlCredentialsProvider() {
-		final File settingsFile = determineSettingsFileLocation();
+	public SettingsXmlCredentialsProvider(Project project) {
+		final File settingsFile = determineSettingsFileLocation( project );
 		this.credentialsByRepoIdMap = extractCredentialsFromSettings( settingsFile );
 	}
 
-	private File determineSettingsFileLocation() {
-		final String defaultLocation = "~/.m2/settings.xml";
-		final String location = System.getProperty( SETTINGS_LOCATION_OVERRIDE, defaultLocation );
+	private File determineSettingsFileLocation(Project project) {
+		String location = System.getProperty( SETTINGS_LOCATION_KEY, "~/.m2/settings.xml" );
+		Object projectLocation = project.getProperties().get( SETTINGS_LOCATION_KEY );
+		if ( projectLocation != null ) {
+			location = (String) projectLocation;
+		}
 		return new File( PathHelper.normalizePath( location ) );
 	}
 

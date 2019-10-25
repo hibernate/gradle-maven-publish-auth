@@ -29,7 +29,7 @@ includes support for Maven "encrypted" passwords as outlined at
 http://maven.apache.org/guides/mini/guide-encryption.html.
 
 By default, settings.xml is loaded from its default location (~/.m2/settings.xml).  You can alter this by specifying
-`-Dmaven.settings=your/path`.
+`-Pmaven.settings=your/path`.
 
 
 Support for the new Gradle Publication DSL

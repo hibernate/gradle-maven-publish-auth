@@ -25,19 +25,19 @@ package org.hibernate.build.gradle.publish.auth.maven;
 
 import java.util.LinkedList;
 
+import org.gradle.api.Project;
+
 /**
  * A registry of {@link CredentialsProvider} instances.
  *
  * @author Steve Ebersole
  */
 public class CredentialsProviderRegistry {
-	private final LinkedList<CredentialsProvider> credentialsProviders = buildStandardAuthenticationProviders();
+	private final LinkedList<CredentialsProvider> credentialsProviders = new LinkedList<CredentialsProvider>();
 
-	private static LinkedList<CredentialsProvider> buildStandardAuthenticationProviders() {
-		LinkedList<CredentialsProvider> providers = new LinkedList<CredentialsProvider>();
+	public CredentialsProviderRegistry(Project project) {
 		// the standard provider
-		providers.add( new SettingsXmlCredentialsProvider() );
-		return providers;
+		credentialsProviders.add( new SettingsXmlCredentialsProvider( project ) );
 	}
 
 	public void appendAuthenticationProvider(CredentialsProvider provider) {

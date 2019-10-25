@@ -34,7 +34,7 @@ import org.gradle.api.Project;
 public class AuthenticationManager implements Plugin<Project> {
 	@Override
 	public void apply(final Project project) {
-		final CredentialsProviderRegistry registry = new CredentialsProviderRegistry();
+		final CredentialsProviderRegistry registry = new CredentialsProviderRegistry( project );
 
 		final PublishingAuthenticationHandler publishingHandler = new PublishingAuthenticationHandler( registry );
 		publishingHandler.applyTo( project );
