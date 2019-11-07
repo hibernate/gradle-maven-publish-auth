@@ -1,30 +1,18 @@
 /*
  * Hibernate, Relational Persistence for Idiomatic Java
  *
- * JBoss, Home of Professional Open Source
- * Copyright 2013 Red Hat Inc. and/or its affiliates and other contributors
- * as indicated by the @authors tag. All rights reserved.
- * See the copyright.txt in the distribution for a
- * full listing of individual contributors.
- *
- * This copyrighted material is made available to anyone wishing to use,
- * modify, copy, or redistribute it subject to the terms and conditions
- * of the GNU Lesser General Public License, v. 2.1.
- * This program is distributed in the hope that it will be useful, but WITHOUT A
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License,
- * v.2.1 along with this distribution; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA  02110-1301, USA.
+ * License: GNU Lesser General Public License (LGPL), version 2.1 or later
+ * See the lgpl.txt file in the root directory or http://www.gnu.org/licenses/lgpl-2.1.html
  */
-package org.hibernate.build.gradle.publish.auth.maven.passwordprocessor;
+package org.hibernate.build.publish.auth.maven.pwd;
 
 import java.io.File;
 
-import org.hibernate.build.gradle.publish.auth.maven.PathHelper;
+import org.hibernate.build.publish.util.PathHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.sonatype.plexus.components.cipher.PlexusCipher;
 import org.sonatype.plexus.components.cipher.PlexusCipherException;
 import org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher;
@@ -39,31 +27,32 @@ import org.sonatype.plexus.components.sec.dispatcher.model.SettingsSecurity;
  * @author Steve Ebersole
  * @author Gunnar Morling
  */
-class DecryptionProcessor extends PasswordProcessor {
+public class DecryptionPasswordStrategy implements PasswordStrategy {
 
 	private static final String DEFAULT_SECURITY_SETTINGS_LOCATION = "~/.m2/settings-security.xml";
 
 	private static final Logger log = LoggerFactory.getLogger( PasswordProcessor.class );
 
+	private final PlexusCipher cipher;
 	private final String master;
 
-	public DecryptionProcessor(String password, PlexusCipher cipher) {
-		super( password, cipher );
+	public DecryptionPasswordStrategy(PlexusCipher cipher) {
+		this.cipher = cipher;
 		this.master = getMasterPassword();
 	}
 
 	@Override
-	public String processPassword() {
+	public String interpretPassword(String password) {
 		return decrypt( password, master );
 	}
 
 	private String getMasterPassword() {
 		File securitySettingsFile = determineSecuritySettingsFileLocation();
-		String encryptedMasterPassword = securitySettingsFile.exists() ?
-				extractMasterPassword( securitySettingsFile ) :
-					null;
+		String encryptedMasterPassword = securitySettingsFile.exists()
+				? extractMasterPassword( securitySettingsFile )
+				: null;
 
-		log.trace( "Encrypted master password: " + encryptedMasterPassword );
+		log.debug( "Encrypted master password: " + encryptedMasterPassword );
 
 		return decrypt( encryptedMasterPassword, DefaultSecDispatcher.SYSTEM_PROPERTY_SEC_LOCATION );
 	}

@@ -1,0 +1,12 @@
+<settings>
+
+    <servers>
+        <server>
+            <id>authenticated-encrypted-server</id>
+            <username>clu</username>
+            <!-- `xyz` encrypted -->
+            <password>{hDBdf0HXN5IHCsc+6gEqNuxmSQpybtrhTwRiyn8l5H4=}</password>
+        </server>
+    </servers>
+
+</settings>

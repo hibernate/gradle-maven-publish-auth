@@ -15,15 +15,15 @@ To apply the plugin, simply specify:
 
 The plugin class is org.hibernate.build.gradle.publish.auth.maven.AuthenticationManager, whose purpose is really just
 to create an instance each of
-* org.hibernate.build.gradle.publish.auth.maven.LegacyAuthenticationHandler
-* org.hibernate.build.gradle.publish.auth.maven.PublishingAuthenticationHandler
+* org.hibernate.build.publish.auth.maven.LegacyAuthenticationHandler
+* org.hibernate.build.publish.auth.maven.PublishingAuthenticationHandler
 
 These handlers get attached to tasks of type org.gradle.api.tasks.Upload and
 org.gradle.api.publish.maven.tasks.PublishToMavenRepository, respectively.
 
-But in either case, both ultimately delegate to any org.hibernate.build.gradle.publish.auth.maven.CredentialsProvider
-instances configured with the org.hibernate.build.gradle.publish.auth.maven.CredentialsProviderRegistry.  Currently
-there is only one supported implementation, org.hibernate.build.gradle.publish.auth.maven.SettingsXmlCredentialsProvider
+But in either case, both ultimately delegate to any org.hibernate.build.publish.auth.CredentialsProvider
+instances configured with the org.hibernate.build.publish.auth.CredentialsProviderRegistry.  Currently
+there is only one supported implementation, org.hibernate.build.publish.auth.maven.SettingsXmlCredentialsProvider
 which parses the Maven settings.xml file and makes those authentication credentials available to Gradle.  This
 includes support for Maven "encrypted" passwords as outlined at
 http://maven.apache.org/guides/mini/guide-encryption.html.
