@@ -1,0 +1,106 @@
+= Maven Repository Auth Plugin
+
+Gradle plugin used to apply credential information defined in Maven config files to Maven repositories
+used in Gradle builds - both for upload and download
+
+== Applying plugin
+
+See https://plugins.gradle.org/plugin/org.hibernate.build.maven-repo-auth for details on how to
+apply the plugin.
+
+Applying the plugin does a number of things:
+
+* Creates an extension object `org.hibernate.build.publish.auth.maven.MavenRepoAuthExtension` and makes it available
+as `mavenRepoAuth` for configuration of the plugin behavior.  At the moment it just exposes the list of
+credential providers.  Projects could theoretically add additional credential providers, but such use is not
+supported
+* Finds all maven repository definitions in the project and applies the "matching" credentials.  A match
+is determined based on the name used in the Gradle build and the server id in the Maven config
+
+
+== Examples
+
+Let's assume we use a Maven repository located at the URL `http://repository.average.joes.com` and that this repo
+is password protected.  Our Maven `settings.xml` file contains:
+
+```
+    <settings>
+        <servers>
+            <server>
+                <id>dogdeball-repo</id>
+                <username>average-joes</username>
+                <password>dodgethis</password>
+             </server>
+        </servers>
+    </settings>
+```
+
+=== Downloads
+
+To download artifacts from the repository, we configure it in the Gradle build like so:
+
+```
+repositories {
+    maven {
+        name = 'dogdeball-repo'
+        url 'http://repository.average.joes.com'
+    }
+}
+```
+
+Because the name applied to the repo in the Gradle build matches the id of the server as configured in
+the Maven `settings.xml` the plugin will apply the credentials from the Maven settings
+
+
+=== Uploads (legacy publishing)
+
+The plugin can also apply the credentials when the legacy approach of publishing via an Upload task available
+through Gradle's MavenPlugin.  E.g.:
+
+```
+    uploadArchives {
+        repositories.mavenDeployer {
+            ...
+            repository(id: 'dogdeball-repo', url: 'http://repository.average.joes.com')
+        }
+    }
+```
+
+Again, because the repo-name / server-id match, the credentials will be applied.
+
+
+=== Publishing
+
+Gradle also defines a proper DSL for "publications", which is also supported by the plugin:
+
+```
+    publishing {
+        repositories {
+            maven {
+                name = 'dogdeball-repo'
+                url 'http://repository.average.joes.com'
+            }
+        }
+    }
+```
+
+=== Limitations
+
+The plugin does not yet work with buildscript repositories.  In the following case, the credentials will
+not get applied:
+
+```
+    buildscript {
+        repositories {
+            maven {
+                name = 'dogdeball-repo'
+                url 'http://repository.average.joes.com'
+            }
+        }
+    }
+```
+
+
+== Additional resources
+
+* http://maven.apache.org/guides/mini/guide-encryption.html
