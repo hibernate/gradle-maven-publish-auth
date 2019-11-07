@@ -45,12 +45,13 @@ gradlePlugin {
 pluginBundle {
 	website = 'https://github.com/sebersole/gradle-maven-publish-auth'
 	vcsUrl = 'https://github.com/sebersole/gradle-maven-publish-auth'
+	tags = ['publish','upload','maven','auth','repository']
 
 	plugins {
 		profilesPlugin {
 			id = 'org.hibernate.build.maven-repo-auth'
-			displayName = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build'
-			description = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build'
+			displayName = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
+			description = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
 		}
 	}
 }
