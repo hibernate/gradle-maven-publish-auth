@@ -21,12 +21,18 @@ import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.Upload;
 import org.gradle.testfixtures.ProjectBuilder;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 /**
  * @author Steve Ebersole
  */
 public class AuthTests {
+
+	@Rule
+	public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+
 	@Test
 	public void testBasicPluginFunction() {
 		System.setProperty(
@@ -82,6 +88,33 @@ public class AuthTests {
 
 		verifyCredentials( project, serverId, "clu", "xyz" );
 	}
+
+	@Test
+	public void testPluginEnvironmentFunction() {
+		environmentVariables.set( "SERVER_USERNAME", "clu" );
+		environmentVariables.set( "SERVER_PASSWORD", "xyz" );
+
+		System.setProperty(
+				SettingsXmlCredentialsProvider.SETTINGS_LOCATION_OVERRIDE,
+				TestHelper.environmentSettingsXmlFile().getAbsolutePath()
+		);
+
+		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
+		final Project project = projectBuilder.build();
+
+		project.getPluginManager().apply( "maven" );
+		project.getPluginManager().apply( "maven-publish" );
+
+		final String serverId = "environment-server";
+
+		applyRepositories( project, serverId );
+
+		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
+		( (ProjectInternal) project ).evaluate();
+
+		verifyCredentials( project, serverId, "clu", "xyz" );
+	}
+
 
 	private void applyRepositories(Project project, String repoName) {
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

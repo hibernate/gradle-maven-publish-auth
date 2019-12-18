@@ -17,6 +17,7 @@ import java.util.Map;
 import org.hibernate.build.publish.auth.Credentials;
 import org.hibernate.build.publish.auth.CredentialsProvider;
 import org.hibernate.build.publish.auth.maven.pwd.PasswordProcessor;
+import org.hibernate.build.publish.auth.maven.pwd.ValueProcessor;
 import org.hibernate.build.publish.util.DomHelper;
 import org.hibernate.build.publish.util.PathHelper;
 
@@ -42,6 +43,8 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	private static final String SETTINGS_DEFAULT_LOCATION = "~/.m2/settings.xml";
 
 	private final Map<String,Credentials> credentialsByRepoIdMap;
+
+	public final ValueProcessor valueProcessor = ValueProcessor.INSTANCE;
 
 	public SettingsXmlCredentialsProvider() {
 		final File settingsFile = determineSettingsFileLocation();
@@ -107,16 +110,20 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	}
 
 	private Credentials extractCredentials(Element serverElement) {
-		final String passwordValue = DomHelper.extractValue( serverElement.element( "password" ) );
+		final String passwordValue = extractValue( serverElement.element( "password" ) );
 		final String password = PasswordProcessor.INSTANCE.resolvePasswordStrategy( passwordValue ).interpretPassword( passwordValue );
 
 		final Credentials authentication = new Credentials();
-		authentication.setUserName( DomHelper.extractValue( serverElement.element( "username" ) ) );
+		authentication.setUserName( extractValue( serverElement.element( "username" ) ) );
 		authentication.setPassword( password );
-		authentication.setPrivateKey( DomHelper.extractValue( serverElement.element( "privateKey" ) ) );
-		authentication.setPassphrase( DomHelper.extractValue( serverElement.element( "passphrase" ) ) );
+		authentication.setPrivateKey( extractValue( serverElement.element( "privateKey" ) ) );
+		authentication.setPassphrase( extractValue( serverElement.element( "passphrase" ) ) );
 
 		return authentication;
+	}
+
+	private String extractValue(Element element) {
+		return valueProcessor.processValue(DomHelper.extractValue(element));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -38,4 +38,8 @@ public class TestHelper {
 	public static File encryptedSettingsXmlFile() {
 		return new File( testProjectsBaseDirectory(), "env/encrypted-settings.xml" );
 	}
+
+	public static File environmentSettingsXmlFile() {
+		return new File( testProjectsBaseDirectory(), "env/environment-settings.xml" );
+	}
 }
