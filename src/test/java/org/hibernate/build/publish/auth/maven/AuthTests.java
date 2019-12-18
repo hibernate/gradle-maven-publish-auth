@@ -115,6 +115,31 @@ public class AuthTests {
 		verifyCredentials( project, serverId, "clu", "xyz" );
 	}
 
+	@Test
+	public void testPluginSystemPropertyFunction() {
+		System.setProperty( "user.name", "admin" );
+		System.setProperty( "user.top.secret.password", "top-secret-password" );
+
+		System.setProperty(
+				SettingsXmlCredentialsProvider.SETTINGS_LOCATION_OVERRIDE,
+				TestHelper.systemPropertiesSettingsXmlFile().getAbsolutePath()
+		);
+
+		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
+		final Project project = projectBuilder.build();
+
+		project.getPluginManager().apply( "maven" );
+		project.getPluginManager().apply( "maven-publish" );
+
+		final String serverId = "system-properties-server";
+
+		applyRepositories( project, serverId );
+
+		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
+		( (ProjectInternal) project ).evaluate();
+
+		verifyCredentials( project, serverId, "admin", "top-secret-password" );
+	}
 
 	private void applyRepositories(Project project, String repoName) {
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

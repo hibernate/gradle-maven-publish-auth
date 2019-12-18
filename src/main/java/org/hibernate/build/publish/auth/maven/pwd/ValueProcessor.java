@@ -17,18 +17,24 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ruslan Mikhalev
  */
 public final class ValueProcessor {
+
 	public static final Logger log = LoggerFactory.getLogger( MethodHandles.lookup().lookupClass() );
 
 	private final GStringTemplateEngine engine;
+	private final PropertyMap systemPropertiesAndEnv;
 
+	@SuppressWarnings("unchecked")
 	private ValueProcessor() {
-		Binding binding = new Binding();
-		binding.setProperty( "env", System.getenv() );
+		this.systemPropertiesAndEnv = new PropertyMap( ( Map )System.getProperties() );
+		systemPropertiesAndEnv.put( "env", System.getenv() );
+
 		this.engine = new GStringTemplateEngine();
 	}
 	/**
@@ -43,7 +49,7 @@ public final class ValueProcessor {
 		try {
 			return engine
 					.createTemplate( value )
-					.make( Collections.singletonMap( "env", System.getenv() ) )
+					.make( systemPropertiesAndEnv )
 					.toString();
 		} catch (IOException | ClassNotFoundException e) {
 			throw new AssertionError( "It should never happen", e );
