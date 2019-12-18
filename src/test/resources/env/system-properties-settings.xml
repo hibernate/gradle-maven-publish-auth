@@ -1,0 +1,11 @@
+<settings>
+
+    <servers>
+        <server>
+            <id>system-properties-server</id>
+            <username>${user.name}</username>
+            <password>${user.top.secret.password}</password>
+        </server>
+    </servers>
+
+</settings>

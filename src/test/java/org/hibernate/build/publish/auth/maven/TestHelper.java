@@ -42,4 +42,8 @@ public class TestHelper {
 	public static File environmentSettingsXmlFile() {
 		return new File( testProjectsBaseDirectory(), "env/environment-settings.xml" );
 	}
+
+	public static File systemPropertiesSettingsXmlFile() {
+		return new File( testProjectsBaseDirectory(), "env/system-properties-settings.xml" );
+	}
 }
