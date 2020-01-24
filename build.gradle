@@ -88,11 +88,3 @@ tasks.withType(JavaCompile) {
 javadoc {
 	options.addStringOption( 'Xdoclint:none', '-quiet' )
 }
-
-wrapper {
-	// To upgrade the version of gradle used in the wrapper, run:
-	//     `./gradlew wrapper --gradle-version NEW_VERSION`
-	// e.g.
-	//     `./gradlew wrapper --gradle-version 5.6.3
-	distributionType = Wrapper.DistributionType.ALL
-}

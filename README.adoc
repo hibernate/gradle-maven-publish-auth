@@ -100,6 +100,13 @@ not get applied:
     }
 ```
 
+=== Gradle Wrapper
+
+To upgrade Gradle Wrapper to a new version, run:
+
+```sh
+./gradlew wrapper --gradle-version NEW_VERSION --distribution-type=all
+```
 
 == Additional resources
 
