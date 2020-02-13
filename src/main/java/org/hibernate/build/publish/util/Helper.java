@@ -6,8 +6,12 @@
  */
 package org.hibernate.build.publish.util;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
-
 import org.hibernate.build.publish.auth.Credentials;
 import org.hibernate.build.publish.auth.CredentialsProvider;
 import org.hibernate.build.publish.auth.CredentialsProviderRegistry;
@@ -16,16 +20,24 @@ import org.hibernate.build.publish.auth.CredentialsProviderRegistry;
  * @author Steve Ebersole
  */
 public class Helper {
+	private static final Set<String> AUTHENTICATABLE_PROTOCOLS =
+			Stream.of( "http", "https", "sftp" )
+					.collect( Collectors.toCollection( HashSet::new ) );
+
 	public static void applyCredentials(
-			String repoId,
-			PasswordCredentials repoCredentials,
+			MavenArtifactRepository repo,
 			CredentialsProviderRegistry credentialsProviderRegistry) {
-		final Credentials credentials = locateAuthenticationCredentials( repoId, credentialsProviderRegistry );
+		if ( !AUTHENTICATABLE_PROTOCOLS.contains( repo.getUrl().getScheme().toLowerCase() ) ) {
+				return;
+		}
+
+		final Credentials credentials = locateAuthenticationCredentials( repo.getName(), credentialsProviderRegistry );
 
 		if ( credentials == null ) {
 			return;
 		}
 
+		final PasswordCredentials repoCredentials = repo.getCredentials();
 		repoCredentials.setUsername( credentials.getUserName() );
 		repoCredentials.setPassword( credentials.getPassword() );
 

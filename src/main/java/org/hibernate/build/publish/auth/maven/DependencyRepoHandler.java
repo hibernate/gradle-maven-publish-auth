@@ -23,8 +23,7 @@ public class DependencyRepoHandler {
 		project.afterEvaluate(
 				p -> p.getRepositories().withType( MavenArtifactRepository.class ).all(
 						repo -> Helper.applyCredentials(
-								repo.getName(),
-								repo.getCredentials(),
+								repo,
 								credentialsProviderRegistry
 						)
 				)

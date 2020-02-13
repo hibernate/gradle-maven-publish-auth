@@ -10,8 +10,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.publish.PublishingExtension;
@@ -29,6 +27,9 @@ import org.junit.contrib.java.lang.system.EnvironmentVariables;
  * @author Steve Ebersole
  */
 public class AuthTests {
+
+	private static final String HTTP_REPO = "http://www.nowhere.com";
+	private static final String FILE_REPO = "file:///this/is/a/directory";
 
 	@Rule
 	public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
@@ -53,12 +54,40 @@ public class AuthTests {
 
 		final String serverId = "authenticated-server";
 
-		applyRepositories( project, serverId );
+		applyRepositories( project, serverId, HTTP_REPO );
 
 		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
 		( (ProjectInternal) project ).evaluate();
 
 		verifyCredentials( project, serverId, "tron", "user" );
+	}
+
+	@Test
+	public void testFileProtocolHasNoCredentials() {
+		System.setProperty(
+				SettingsXmlCredentialsProvider.SETTINGS_LOCATION_OVERRIDE,
+				TestHelper.settingsXmlFile().getAbsolutePath()
+		);
+
+		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
+		final Project project = projectBuilder.build();
+
+		project.getPluginManager().apply( "maven" );
+		project.getPluginManager().apply( "maven-publish" );
+
+
+//		// Define a configuration for published artifacts - legacy publishing needs this
+//		final Configuration publishedArtifactsConfiguration = project.getConfigurations().create( "publishedArtifacts" );
+//		project.getArtifacts().add( publishedArtifactsConfiguration.getName(), project.file( "build/pubs" ) );
+
+		final String serverId = "authenticated-server";
+
+		applyRepositories( project, serverId, FILE_REPO );
+
+		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
+		( (ProjectInternal) project ).evaluate();
+
+		verifyCredentials( project, serverId, null, null );
 	}
 
 	@Test
@@ -81,7 +110,7 @@ public class AuthTests {
 
 		final String serverId = "authenticated-encrypted-server";
 
-		applyRepositories( project, serverId );
+		applyRepositories( project, serverId, HTTP_REPO );
 
 		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
 		( (ProjectInternal) project ).evaluate();
@@ -107,7 +136,7 @@ public class AuthTests {
 
 		final String serverId = "environment-server";
 
-		applyRepositories( project, serverId );
+		applyRepositories( project, serverId, HTTP_REPO );
 
 		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
 		( (ProjectInternal) project ).evaluate();
@@ -133,7 +162,7 @@ public class AuthTests {
 
 		final String serverId = "system-properties-server";
 
-		applyRepositories( project, serverId );
+		applyRepositories( project, serverId, HTTP_REPO );
 
 		project.getPluginManager().apply( MavenRepoAuthPlugin.class );
 		( (ProjectInternal) project ).evaluate();
@@ -141,14 +170,14 @@ public class AuthTests {
 		verifyCredentials( project, serverId, "admin", "top-secret-password" );
 	}
 
-	private void applyRepositories(Project project, String repoName) {
+	private void applyRepositories(Project project, String repoName, String repoUrl) {
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		// Define the dependency repo
 
 		project.getRepositories().maven(
 				repo -> {
 					repo.setName( repoName );
-					repo.setUrl( "http://www.nowhere.com" );
+					repo.setUrl( repoUrl );
 				}
 		);
 
@@ -161,7 +190,7 @@ public class AuthTests {
 		publishingExtension.getRepositories().maven(
 				repo -> {
 					repo.setName( repoName );
-					repo.setUrl( "http://www.nowhere.com" );
+					repo.setUrl( repoUrl );
 				}
 		);
 		publishingExtension.getPublications().create(
@@ -177,7 +206,7 @@ public class AuthTests {
 		uploadArchivesTask.getRepositories().maven(
 				repo -> {
 					repo.setName( repoName );
-					repo.setUrl( "http://www.nowhere.com" );
+					repo.setUrl( repoUrl );
 				}
 		);
 	}
