@@ -28,8 +28,7 @@ public class PublishingRepoHandler {
 								final MavenArtifactRepository mavenRepo = (MavenArtifactRepository) repo;
 
 								Helper.applyCredentials(
-										mavenRepo.getName(),
-										mavenRepo.getCredentials(),
+										mavenRepo,
 										credentialsProviderRegistry
 								);
 							}

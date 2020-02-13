@@ -7,8 +7,6 @@
 package org.hibernate.build.publish.auth.maven;
 
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.maven.MavenDeployer;
-import org.gradle.api.artifacts.maven.MavenResolver;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.tasks.Upload;
@@ -37,8 +35,7 @@ public class LegacyHandler {
 			if ( repository instanceof MavenArtifactRepository ) {
 				final MavenArtifactRepository mavenRepo = (MavenArtifactRepository) repository;
 				Helper.applyCredentials(
-						mavenRepo.getName(),
-						mavenRepo.getCredentials(),
+						mavenRepo,
 						credentialsProviderRegistry
 				);
 			}
