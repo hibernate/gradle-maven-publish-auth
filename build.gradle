@@ -17,7 +17,7 @@ plugins {
 // So long story short, not putting "gradle" in groupName here
 
 group = 'org.hibernate.build'
-version = '3.0.1-SNAPSHOT'
+version = '3.0.0'
 
 defaultTasks 'test'
 
@@ -87,4 +87,10 @@ tasks.withType(JavaCompile) {
 
 javadoc {
 	options.addStringOption( 'Xdoclint:none', '-quiet' )
+}
+
+wrapper {
+	// Version is set using the wrapper task's `--gradle-version` property on the command line.
+	// See README for more info
+	distributionType = Wrapper.DistributionType.ALL
 }
