@@ -2,7 +2,7 @@
 plugins {
 	id 'java'
 	id 'java-gradle-plugin'
-	id "com.gradle.plugin-publish" version "0.9.10"
+	id 'com.gradle.plugin-publish' version '0.11.0'
 	id 'idea'
 	id 'eclipse'
 }
@@ -17,7 +17,10 @@ plugins {
 // So long story short, not putting "gradle" in groupName here
 
 group = 'org.hibernate.build'
-version = '3.0.2-SNAPSHOT'
+version = '3.0.3-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 defaultTasks 'test'
 
@@ -62,7 +65,7 @@ tasks.compile.dependsOn tasks.compileJava, tasks.compileTestJava
 
 idea {
 	project {
-		languageLevel = '1.6'
+		languageLevel = '1.8'
 	}
 	module {
 		downloadSources = true
