@@ -87,7 +87,9 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 					log.debug( "Adding credentials for server : " + id );
 
 					final Credentials authentication = extractCredentials( serverElement );
-					result.put( id, authentication );
+					if ( authentication != null ) {
+						result.put( id, authentication );
+					}
 				}
 
 				return Collections.unmodifiableMap( result );
@@ -111,6 +113,10 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 
 	private Credentials extractCredentials(Element serverElement) {
 		final String passwordValue = extractValue( serverElement.element( "password" ) );
+		if ( passwordValue == null ) {
+			return null;
+		}
+
 		final String password = PasswordProcessor.INSTANCE.resolvePasswordStrategy( passwordValue ).interpretPassword( passwordValue );
 
 		final Credentials authentication = new Credentials();
@@ -123,7 +129,7 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 	}
 
 	private String extractValue(Element element) {
-		return valueProcessor.processValue(DomHelper.extractValue(element));
+		return valueProcessor.processValue( DomHelper.extractValue( element ) );
 	}
 
 	@SuppressWarnings("unchecked")
