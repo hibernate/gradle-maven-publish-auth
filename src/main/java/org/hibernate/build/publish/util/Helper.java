@@ -47,10 +47,16 @@ public class Helper {
 			String repositoryId,
 			CredentialsProviderRegistry credentialsProviderRegistry) {
 		for ( CredentialsProvider provider : credentialsProviderRegistry.providers() ) {
-			Credentials authentication = provider.determineAuthentication( repositoryId );
-			if ( authentication != null ) {
-				return authentication;
+			final Credentials authentication = provider.determineAuthentication( repositoryId );
+			if ( authentication == null ) {
+				continue;
 			}
+
+			if ( authentication.getPassword() == null ) {
+				continue;
+			}
+
+			return authentication;
 		}
 
 		return null;
