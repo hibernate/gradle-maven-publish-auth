@@ -18,6 +18,7 @@ import org.hibernate.build.publish.auth.Credentials;
 import org.hibernate.build.publish.auth.CredentialsProvider;
 import org.hibernate.build.publish.auth.maven.pwd.PasswordProcessor;
 import org.hibernate.build.publish.auth.maven.pwd.ValueProcessor;
+import org.hibernate.build.publish.auth.maven.pwd.ValueProcessorRegex;
 import org.hibernate.build.publish.util.DomHelper;
 import org.hibernate.build.publish.util.PathHelper;
 
@@ -44,7 +45,7 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 
 	private final Map<String,Credentials> credentialsByRepoIdMap;
 
-	public final ValueProcessor valueProcessor = ValueProcessor.INSTANCE;
+	public final ValueProcessor valueProcessor = ValueProcessorRegex.INSTANCE;
 
 	public SettingsXmlCredentialsProvider() {
 		final File settingsFile = determineSettingsFileLocation();
