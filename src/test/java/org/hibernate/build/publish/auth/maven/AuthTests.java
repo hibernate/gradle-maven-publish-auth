@@ -22,6 +22,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 /**
  * @author Steve Ebersole
@@ -31,6 +32,8 @@ public class AuthTests {
 	private static final String HTTP_REPO = "http://www.nowhere.com";
 	private static final String FILE_REPO = "file:///this/is/a/directory";
 
+	@Rule
+	public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 	@Rule
 	public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
