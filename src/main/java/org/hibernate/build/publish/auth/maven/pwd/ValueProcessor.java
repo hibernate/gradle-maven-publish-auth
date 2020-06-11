@@ -12,6 +12,13 @@ package org.hibernate.build.publish.auth.maven.pwd;
  */
 public interface ValueProcessor {
 
+    /**
+     * Processes a string possibly containing properties, those will be placed. <br>
+     * Properties are defined as by <a href="https://maven.apache.org/settings.html#quick-overview">Maven</a>.
+     *
+     * @param value string w/o properties
+     * @return null if value is null
+     */
     String processValue(String value);
 
 }

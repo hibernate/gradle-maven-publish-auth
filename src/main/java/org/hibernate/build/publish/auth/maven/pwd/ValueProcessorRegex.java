@@ -19,11 +19,6 @@ public final class ValueProcessorRegex implements ValueProcessor {
      */
     public static final ValueProcessorRegex INSTANCE = new ValueProcessorRegex();
 
-    /*
-     * TODO not usable chars
-     *  https://www.w3.org/TR/xml/#NT-Char
-     *  https://www.w3.org/TR/xml/#NT-EntityValue
-     */
     private static final Pattern PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9-._]+)\\}");
     private final PropertyMap systemPropertiesAndEnv;
 
