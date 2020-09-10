@@ -14,6 +14,7 @@ plugins {
 	id 'idea'
 	id 'eclipse'
 }
+
 ext {
 	pluginId = 'org.hibernate.build.maven-repo-auth'
 	pluginVersion = '3.0.4-SNAPSHOT'
@@ -22,13 +23,6 @@ ext {
 	publishKey = credentials.'hibernate.gradle.publish.key'
 	//noinspection GrUnresolvedAccess
 	publishSecret = credentials.'hibernate.gradle.publish.secret'
-
-	if ( ext.publishKey == null ) {
-		throw new RuntimeException( "`hibernate.gradle.publish.key` not found" )
-	}
-	if ( ext.publishSecret == null ) {
-		throw new RuntimeException( "`hibernate.gradle.publish.secret` not found" )
-	}
 
 	project.setProperty( 'gradle.publish.key', ext.publishKey )
 	project.setProperty( 'gradle.publish.secret', ext.publishSecret )
@@ -58,7 +52,7 @@ dependencies {
 gradlePlugin {
 	plugins {
 		profilesPlugin {
-			id = ext.pluginId
+			id = project.pluginId
 			implementationClass = 'org.hibernate.build.publish.auth.maven.MavenRepoAuthPlugin'
 		}
 	}
@@ -71,9 +65,20 @@ pluginBundle {
 
 	plugins {
 		profilesPlugin {
-			id = ext.pluginId
+			id = project.pluginId
 			displayName = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
 			description = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
+		}
+	}
+}
+
+tasks.publishPlugins {
+	doFirst {
+		if ( project.publishKey == null ) {
+			throw new RuntimeException( "`hibernate.gradle.publish.key` not found" )
+		}
+		if ( project.publishKey == null ) {
+			throw new RuntimeException( "`hibernate.gradle.publish.secret` not found" )
 		}
 	}
 }
