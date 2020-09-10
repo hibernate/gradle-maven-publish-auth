@@ -2,22 +2,40 @@
 plugins {
 	id 'java'
 	id 'java-gradle-plugin'
+
+	// for publishing to plugin portal
 	id 'com.gradle.plugin-publish' version '0.11.0'
+	id "nu.studer.credentials" version "2.1"
+
+	// for publishing snapshots
+	id 'maven-publish'
+	id 'org.hibernate.build.maven-repo-auth' version '3.0.3'
+
 	id 'idea'
 	id 'eclipse'
 }
+ext {
+	pluginId = 'org.hibernate.testing.database-profile'
+	pluginVersion = '3.0.4-SNAPSHOT'
 
-// NOTE : plugins published to the Gradle Plugin Portal automatically
-// have `gradle.plugin.` prepended to their group name.
-//
-// It does allow that to be overridden, but then publishing requires
-// manual intervention from Gradle team to approve...  not worth the
-// hassle
-//
-// So long story short, not putting "gradle" in groupName here
+	//noinspection GrUnresolvedAccess
+	publishKey = credentials.'hibernate.gradle.publish.key'
+	//noinspection GrUnresolvedAccess
+	publishSecret = credentials.'hibernate.gradle.publish.secret'
+
+	if ( ext.publishKey == null ) {
+		throw new RuntimeException( "`hibernate.gradle.publish.key` not found" )
+	}
+	if ( ext.publishSecret == null ) {
+		throw new RuntimeException( "`hibernate.gradle.publish.secret` not found" )
+	}
+
+	project.setProperty( 'gradle.publish.key', ext.publishKey )
+	project.setProperty( 'gradle.publish.secret', ext.publishSecret )
+}
 
 group = 'org.hibernate.build'
-version = '3.0.4-SNAPSHOT'
+version = ext.pluginVersion
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
