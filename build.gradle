@@ -15,7 +15,7 @@ plugins {
 	id 'eclipse'
 }
 ext {
-	pluginId = 'org.hibernate.testing.database-profile'
+	pluginId = 'org.hibernate.build.maven-repo-auth'
 	pluginVersion = '3.0.4-SNAPSHOT'
 
 	//noinspection GrUnresolvedAccess
@@ -58,20 +58,20 @@ dependencies {
 gradlePlugin {
 	plugins {
 		profilesPlugin {
-			id = 'org.hibernate.build.maven-repo-auth'
+			id = ext.pluginId
 			implementationClass = 'org.hibernate.build.publish.auth.maven.MavenRepoAuthPlugin'
 		}
 	}
 }
 
 pluginBundle {
-	website = 'https://github.com/sebersole/gradle-maven-publish-auth'
-	vcsUrl = 'https://github.com/sebersole/gradle-maven-publish-auth'
+	website = 'https://github.com/hibernate/gradle-maven-publish-auth'
+	vcsUrl = 'https://github.com/hibernate/gradle-maven-publish-auth'
 	tags = ['publish','upload','maven','auth','repository']
 
 	plugins {
 		profilesPlugin {
-			id = 'org.hibernate.build.maven-repo-auth'
+			id = ext.pluginId
 			displayName = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
 			description = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
 		}
