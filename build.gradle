@@ -71,6 +71,10 @@ pluginBundle {
 	}
 }
 
+if ( version.toString().endsWith( '-SNAPSHOT' ) ) {
+	tasks.publishPlugins.enabled = false
+}
+
 tasks.publishPlugins {
 	doFirst {
 		if ( project.publishKey == null ) {
