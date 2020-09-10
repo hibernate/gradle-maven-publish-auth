@@ -8,7 +8,7 @@ plugins {
 
 	// for publishing snapshots
 	id 'maven-publish'
-	id 'org.hibernate.build.maven-repo-auth' version '3.0.3'
+	id 'org.hibernate.build.maven-repo-auth' version '3.0.4'
 
 	id 'idea'
 	id 'eclipse'
@@ -16,7 +16,7 @@ plugins {
 
 ext {
 	pluginId = 'org.hibernate.build.maven-repo-auth'
-	pluginVersion = '3.0.4'
+	pluginVersion = '3.0.5-SNAPSHOT'
 
 	//noinspection GrUnresolvedAccess
 	publishKey = credentials.'hibernate.gradle.publish.key'
