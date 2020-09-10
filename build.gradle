@@ -16,7 +16,7 @@ plugins {
 
 ext {
 	pluginId = 'org.hibernate.build.maven-repo-auth'
-	pluginVersion = '3.0.4-SNAPSHOT'
+	pluginVersion = '3.0.4'
 
 	//noinspection GrUnresolvedAccess
 	publishKey = credentials.'hibernate.gradle.publish.key'
