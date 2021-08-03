@@ -2,7 +2,7 @@
 
     <servers>
         <server>
-            <id>system-properties-server</id>
+            <id>system-properties-server-${user.id}</id>
             <username>${user.name}</username>
             <password>${user.top.secret.password}</password>
         </server>
