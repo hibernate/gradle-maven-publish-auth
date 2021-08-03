@@ -80,7 +80,7 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 				final Map<String,Credentials> result = new HashMap<>();
 
 				for ( Element serverElement : serverElements ) {
-					final String id = DomHelper.extractValue( serverElement.element( "id" ) );
+					final String id = extractValue( serverElement.element( "id" ) );
 					if ( id == null ) {
 						continue;
 					}

@@ -123,6 +123,7 @@ public class AuthTests {
 
 	@Test
 	public void testPluginEnvironmentFunction() {
+		environmentVariables.set( "SERVER_ID", "id" );
 		environmentVariables.set( "SERVER_USERNAME", "clu" );
 		environmentVariables.set( "SERVER_PASSWORD", "xyz" );
 
@@ -137,7 +138,7 @@ public class AuthTests {
 		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
-		final String serverId = "environment-server";
+		final String serverId = "environment-server-id";
 
 		applyRepositories( project, serverId, HTTP_REPO );
 
@@ -149,6 +150,7 @@ public class AuthTests {
 
 	@Test
 	public void testPluginSystemPropertyFunction() {
+		System.setProperty( "user.id", "testid" );
 		System.setProperty( "user.name", "admin" );
 		System.setProperty( "user.top.secret.password", "top-secret-password" );
 
@@ -163,7 +165,7 @@ public class AuthTests {
 		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
-		final String serverId = "system-properties-server";
+		final String serverId = "system-properties-server-testid";
 
 		applyRepositories( project, serverId, HTTP_REPO );
 
