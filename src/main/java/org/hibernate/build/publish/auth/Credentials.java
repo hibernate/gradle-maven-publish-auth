@@ -11,6 +11,7 @@ package org.hibernate.build.publish.auth;
  *
  * @author Steve Ebersole
  */
+@SuppressWarnings("unused")
 public class Credentials {
     private String userName;
     private String password;

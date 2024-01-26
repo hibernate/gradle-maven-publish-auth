@@ -19,7 +19,7 @@ public final class ValueProcessorRegex implements ValueProcessor {
      */
     public static final ValueProcessorRegex INSTANCE = new ValueProcessorRegex();
 
-    private static final Pattern PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9-._]+)\\}");
+    private static final Pattern PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9-._]+)}");
     private final PropertyMap systemPropertiesAndEnv;
 
     private ValueProcessorRegex() {
@@ -32,12 +32,12 @@ public final class ValueProcessorRegex implements ValueProcessor {
             return null;
         }
         final Matcher matcher = PATTERN.matcher(value);
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         while (matcher.find()) {
             final String group = matcher.group(1);
             matcher.appendReplacement(s, systemPropertiesAndEnv.get(group).map(Matcher::quoteReplacement).orElse(Matcher.quoteReplacement(matcher.group())));
         }
-        if (s.length() == 0) {
+        if (s.isEmpty()) {
             return value;
         } else {
             return s.toString();

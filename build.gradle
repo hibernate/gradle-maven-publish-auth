@@ -3,35 +3,23 @@ plugins {
 	id 'java-gradle-plugin'
 
 	// for publishing to plugin portal
-	id 'com.gradle.plugin-publish' version '0.11.0'
-	id "nu.studer.credentials" version "2.1"
+	id 'com.gradle.plugin-publish' version '1.2.1'
 
 	// for publishing snapshots
 	id 'maven-publish'
 	id 'org.hibernate.build.maven-repo-auth' version '3.0.4'
-
-	id 'idea'
-	id 'eclipse'
 }
 
 ext {
-	pluginId = 'org.hibernate.build.maven-repo-auth'
-	pluginVersion = '3.0.5-SNAPSHOT'
-
-	//noinspection GrUnresolvedAccess
-	publishKey = credentials.'hibernate.gradle.publish.key'
-	//noinspection GrUnresolvedAccess
-	publishSecret = credentials.'hibernate.gradle.publish.secret'
-
-	project.setProperty( 'gradle.publish.key', ext.publishKey )
-	project.setProperty( 'gradle.publish.secret', ext.publishSecret )
+	pluginId = 'digital.fino.build.gradle-maven-auth'
+	pluginVersion = '4.0.0'
 }
 
-group = 'org.hibernate.build'
+group = 'digital.fino.build'
 version = ext.pluginVersion
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 defaultTasks 'test'
 
@@ -40,77 +28,43 @@ repositories {
 }
 
 dependencies {
-    compile 'dom4j:dom4j:1.6.1@jar'
-	compile 'org.sonatype.plexus:plexus-sec-dispatcher:1.3'
-	compile 'org.codehaus.plexus:plexus-container-default:1.0.0'
+    implementation('org.dom4j:dom4j:2.1.4')
+	implementation('org.sonatype.plexus:plexus-sec-dispatcher:1.4')
+	implementation('org.codehaus.plexus:plexus-container-default:2.1.1')
 
-	testCompile 'com.github.stefanbirkner:system-rules:1.19.0'
-	testCompile 'junit:junit:4.12'
+	testImplementation('uk.org.webcompere:system-stubs-jupiter:2.1.6')
+	testImplementation('org.junit.jupiter:junit-jupiter:5.10.1')
 }
 
 gradlePlugin {
-	plugins {
-		profilesPlugin {
-			id = project.pluginId
-			implementationClass = 'org.hibernate.build.publish.auth.maven.MavenRepoAuthPlugin'
-		}
-	}
-}
-
-pluginBundle {
-	website = 'https://github.com/hibernate/gradle-maven-publish-auth'
-	vcsUrl = 'https://github.com/hibernate/gradle-maven-publish-auth'
-	tags = ['publish','upload','maven','auth','repository']
+	website = 'https://github.com/fino-digital/gradle-maven-auth'
+	vcsUrl = 'https://github.com/fino-digital/gradle-maven-auth'
 
 	plugins {
-		profilesPlugin {
+		mavenAuthPlugin {
 			id = project.pluginId
 			displayName = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
-			description = 'Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
+			description = 'Updated version of org.hibernate.build.maven-repo-auth -- Applies security defined for a repository in Maven\'s settings.xml file to MavenRepository elements in a Gradle build - both upload and download'
+			implementationClass = 'org.hibernate.build.publish.auth.maven.MavenRepoAuthPlugin'
+			tags.set(['publish','upload','maven','auth','repository'])
 		}
 	}
 }
 
 if ( version.toString().endsWith( '-SNAPSHOT' ) ) {
+	System.err.println( 'SNAPSHOT version detected - not publishing unreleased version' )
 	tasks.publishPlugins.enabled = false
 }
 
-tasks.publishPlugins {
-	doFirst {
-		if ( project.publishKey == null ) {
-			throw new RuntimeException( "`hibernate.gradle.publish.key` not found" )
-		}
-		if ( project.publishKey == null ) {
-			throw new RuntimeException( "`hibernate.gradle.publish.secret` not found" )
-		}
-	}
+tasks.register('compile') {
+	dependsOn tasks.compileJava, tasks.compileTestJava
 }
 
-task compile
-tasks.compile.dependsOn tasks.compileJava, tasks.compileTestJava
-
-idea {
-	project {
-		languageLevel = '1.8'
-	}
-	module {
-		downloadSources = true
-	}
+test {
+	useJUnitPlatform()
 }
 
-ideaModule {
-}
-
-task copyResourcesToIntelliJOutFolder(dependsOn: tasks.processTestResources) {
-	doLast {
-		copy {
-			from "$buildDir/resources/test"
-			into 'out/test/resources'
-		}
-	}
-}
-
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
 	options.compilerArgs << "-Xlint:unchecked"
 }
 

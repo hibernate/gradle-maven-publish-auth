@@ -8,14 +8,13 @@ package org.hibernate.build.publish.auth;
 
 import java.util.LinkedList;
 
-import org.hibernate.build.publish.auth.maven.SettingsXmlCredentialsProvider;
-
 /**
  *
  * A registry of {@link CredentialsProvider} instances.
  *
  * @author Steve Ebersole
  */
+@SuppressWarnings("unused")
 public class CredentialsProviderRegistry {
 	private final LinkedList<CredentialsProvider> credentialsProviders = new LinkedList<>();
 

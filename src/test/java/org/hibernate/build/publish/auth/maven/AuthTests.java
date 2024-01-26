@@ -16,25 +16,26 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository;
 import org.gradle.api.tasks.TaskCollection;
-import org.gradle.api.tasks.Upload;
 import org.gradle.testfixtures.ProjectBuilder;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 /**
  * @author Steve Ebersole
  */
+@ExtendWith(SystemStubsExtension.class)
 public class AuthTests {
 
 	private static final String HTTP_REPO = "http://www.nowhere.com";
 	private static final String FILE_REPO = "file:///this/is/a/directory";
 
-	@Rule
-	public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
-	@Rule
+//	@Rule
+//	public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+	@SystemStub
 	public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
 	@Test
@@ -47,7 +48,6 @@ public class AuthTests {
 		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
 		final Project project = projectBuilder.build();
 
-		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
 
@@ -75,7 +75,6 @@ public class AuthTests {
 		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
 		final Project project = projectBuilder.build();
 
-		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
 
@@ -108,7 +107,6 @@ public class AuthTests {
 		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "encrypted" ) );
 		final Project project = projectBuilder.build();
 
-		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
 		final String serverId = "authenticated-encrypted-server";
@@ -134,7 +132,6 @@ public class AuthTests {
 		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
 		final Project project = projectBuilder.build();
 
-		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
 		final String serverId = "environment-server";
@@ -160,7 +157,6 @@ public class AuthTests {
 		final ProjectBuilder projectBuilder = ProjectBuilder.builder().withProjectDir( TestHelper.projectDirectory( "simple" ) );
 		final Project project = projectBuilder.build();
 
-		project.getPluginManager().apply( "maven" );
 		project.getPluginManager().apply( "maven-publish" );
 
 		final String serverId = "system-properties-server";
@@ -201,17 +197,6 @@ public class AuthTests {
 				MavenPublication.class
 		);
 
-
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		// Apply the legacy maven upload support
-
-		final Upload uploadArchivesTask = (Upload) project.getTasks().findByName( "uploadArchives" );
-		uploadArchivesTask.getRepositories().maven(
-				repo -> {
-					repo.setName( repoName );
-					repo.setUrl( repoUrl );
-				}
-		);
 	}
 
 	private void verifyCredentials(
@@ -222,12 +207,6 @@ public class AuthTests {
 		// artifact repo
 		final MavenArtifactRepository repo = (MavenArtifactRepository) project.getRepositories().getByName( serverId );
 		check( expectedUsername, expectedPassword, repo );
-
-		// legacy upload task
-		final Upload uploadArchivesTask = (Upload) project.getTasks().findByName( "uploadArchives" );
-		assert uploadArchivesTask != null;
-		final MavenArtifactRepository uploadRepo = (MavenArtifactRepository) uploadArchivesTask.getRepositories().getByName( serverId );
-		check( expectedUsername, expectedPassword, uploadRepo );
 
 		// publishing
 		final TaskCollection<PublishToMavenRepository> publishTasks = project.getTasks().withType( PublishToMavenRepository.class );

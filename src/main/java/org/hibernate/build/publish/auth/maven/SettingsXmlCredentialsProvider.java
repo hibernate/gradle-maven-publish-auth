@@ -133,7 +133,6 @@ public class SettingsXmlCredentialsProvider implements CredentialsProvider {
 		return valueProcessor.processValue( DomHelper.extractValue( element ) );
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<Element> seekServerElements(Document document) {
 		final Element settingsElement = document.getRootElement();
 		if ( settingsElement != null ) {

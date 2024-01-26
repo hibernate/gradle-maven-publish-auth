@@ -22,7 +22,7 @@ public class DomHelper {
 		}
 
 		final String value = element.getTextTrim();
-		if ( value != null && value.length() == 0 ) {
+		if ( value != null && value.isEmpty()) {
 			return null;
 		}
 

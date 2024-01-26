@@ -22,11 +22,10 @@ public class MavenRepoAuthPlugin implements Plugin<Project> {
 				new CredentialsProviderRegistry( new SettingsXmlCredentialsProvider() )
 		);
 		project.getExtensions().add( MavenRepoAuthExtension.NAME, extension );
-		doApply( project, extension.getCredentialsProviderRegistry() );
+		doApply( project, extension.credentialsProviderRegistry() );
 	}
 
 	public static void doApply(Project project, CredentialsProviderRegistry registry) {
-		LegacyHandler.apply( project, registry );
 		PublishingRepoHandler.apply( project, registry );
 		DependencyRepoHandler.apply( project, registry );
 	}

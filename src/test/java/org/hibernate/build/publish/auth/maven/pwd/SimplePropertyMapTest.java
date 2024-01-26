@@ -6,22 +6,26 @@
  */
 package org.hibernate.build.publish.auth.maven.pwd;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.ClearSystemProperties;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(SystemStubsExtension.class)
 public class SimplePropertyMapTest {
 
-    @Rule
+    @SystemStub
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
     private final String NOT_EXISTENT_KEY = "not.existent";
-    @Rule
-    public final ClearSystemProperties restoreSystemProperties = new ClearSystemProperties(NOT_EXISTENT_KEY);
+//    @Rule
+//    public final ClearSystemProperties restoreSystemProperties = new ClearSystemProperties(NOT_EXISTENT_KEY);
 
     @Test
     public void systemPropertyPresent() {
@@ -38,7 +42,7 @@ public class SimplePropertyMapTest {
     public void systemPropertyNotPresent() {
         final PropertyMap propertyMap = new SimplePropertyMap();
         final Optional<String> optional = propertyMap.get(NOT_EXISTENT_KEY);
-        assertFalse(optional.isPresent());
+        Assertions.assertFalse(optional.isPresent());
     }
 
     @Test
@@ -55,10 +59,10 @@ public class SimplePropertyMapTest {
     @Test
     public void envPropertyNotPresent() {
         final String key = "HOME_MAVEN";
-        environmentVariables.clear(key);
+        //environmentVariables.clear(key);
         final PropertyMap propertyMap = new SimplePropertyMap();
         final Optional<String> optional = propertyMap.get("env." + key);
-        assertFalse(optional.isPresent());
+        Assertions.assertFalse(optional.isPresent());
     }
 
 }

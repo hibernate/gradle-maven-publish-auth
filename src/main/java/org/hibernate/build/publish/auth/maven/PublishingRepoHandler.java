@@ -7,11 +7,13 @@
 package org.hibernate.build.publish.auth.maven;
 
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
-import org.gradle.api.publish.PublishingExtension;
 
 import org.hibernate.build.publish.auth.CredentialsProviderRegistry;
 import org.hibernate.build.publish.util.Helper;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Acts as the main authentication coordinator for "publish" tasks using the Publication API.
@@ -21,19 +23,35 @@ import org.hibernate.build.publish.util.Helper;
 @SuppressWarnings("WeakerAccess")
 public class PublishingRepoHandler {
 	public static void apply(Project project, CredentialsProviderRegistry credentialsProviderRegistry) {
-		project.afterEvaluate(
-				p -> p.getExtensions().getByType( PublishingExtension.class ).getRepositories().forEach(
-						repo -> {
-							if ( repo instanceof MavenArtifactRepository ) {
-								final MavenArtifactRepository mavenRepo = (MavenArtifactRepository) repo;
+		if( project.getExtensions().findByName( "publishing" ) == null ) {
+			return;
+		}
 
-								Helper.applyCredentials(
-										mavenRepo,
-										credentialsProviderRegistry
-								);
+		project.afterEvaluate(
+				p -> {
+                    RepositoryHandler repos;
+                    try {
+						// load class by name, so we do not have to depend on the publishing plugin
+						// org.gradle.api.publish.PublishingExtension.class
+						var clazz = project.getClass().getClassLoader().loadClass( "org.gradle.api.publish.PublishingExtension" );
+						Object publishingExtension = p.getExtensions().getByType(clazz);
+                        repos = (RepositoryHandler) clazz.getMethod("getRepositories").invoke(publishingExtension);
+                    } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
+                             ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                    repos.forEach(
+							repo -> {
+								if (repo instanceof MavenArtifactRepository mavenRepo) {
+
+									Helper.applyCredentials(
+											mavenRepo,
+											credentialsProviderRegistry
+									);
+								}
 							}
-						}
-				)
+					);
+				}
 		);
 	}
 }
